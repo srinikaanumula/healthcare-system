@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TestPilot | AI-Assisted Test Case Generation for Healthcare Platform</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              800: '#115e59',
+              900: '#134e4a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .tab-active {
+      border-bottom: 3px solid #0d9488;
+      color: #0f766e;
+      font-weight: 600;
+    }
+    .badge-positive { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .badge-negative { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    .badge-edge { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .badge-approved { background-color: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo and Title -->
+        <div class="flex items-center space-x-3">
+          <div class="bg-gradient-to-tr from-teal-600 to-cyan-500 text-white p-2.5 rounded-xl shadow-md flex items-center justify-center">
+            <i data-lucide="crosshair" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xl font-black tracking-tight text-slate-900">TestPilot</span>
+              <span class="text-xs bg-teal-100 text-teal-800 font-bold px-2 py-0.5 rounded-full">v1.0 Prototype</span>
+              <span class="text-xs bg-indigo-50 text-indigo-700 font-medium px-2 py-0.5 rounded-full border border-indigo-200">BITS Pilani BSDCH ZC229T</span>
+            </div>
+            <p class="text-xs text-slate-500">AI-Assisted Test Case Generation for Full-Stack Healthcare Platform</p>
+          </div>
+        </div>
+
+        <!-- AUT Status Indicators & Global Actions -->
+        <div class="flex items-center space-x-3">
+          <div class="flex items-center space-x-2 text-xs bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+            <span class="font-medium text-slate-600">AUT Frontend (3000):</span>
+            <span id="fe-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+            <span id="fe-status-text" class="text-slate-500">checking</span>
+            <span class="text-slate-300">|</span>
+            <span class="font-medium text-slate-600">AUT Backend (5000):</span>
+            <span id="be-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+            <span id="be-status-text" class="text-slate-500">checking</span>
+            <button onclick="checkAutStatus()" title="Refresh AUT Status" class="text-slate-400 hover:text-slate-600 ml-1">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+
+          <a href="/api/export/playwright" download class="flex items-center space-x-1.5 text-xs bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 rounded-lg font-medium shadow-sm transition">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Export Spec</span>
+          </a>
+
+          <button onclick="resetSeedData()" class="flex items-center space-x-1.5 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg font-medium border border-slate-200 transition">
+            <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+            <span>Reset Seeds</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex space-x-8 -mb-px text-sm font-medium overflow-x-auto">
+        <button onclick="switchTab('user-stories')" id="tab-btn-user-stories" class="tab-btn tab-active py-3 px-1 flex items-center space-x-2">
+          <i data-lucide="book-open" class="w-4 h-4"></i>
+          <span>1. User Stories & Scope</span>
+          <span id="badge-story-count" class="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">17</span>
+        </button>
+
+        <button onclick="switchTab('prompt-lab')" id="tab-btn-prompt-lab" class="tab-btn text-slate-500 hover:text-slate-700 py-3 px-1 flex items-center space-x-2">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>2. Prompt Engineering Lab</span>
+        </button>
+
+        <button onclick="switchTab('review-board')" id="tab-btn-review-board" class="tab-btn text-slate-500 hover:text-slate-700 py-3 px-1 flex items-center space-x-2">
+          <i data-lucide="user-check" class="w-4 h-4"></i>
+          <span>3. Human Review & Approval</span>
+          <span id="badge-approved-count" class="text-xs bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full font-bold">6</span>
+        </button>
+
+        <button onclick="switchTab('execution-dash')" id="tab-btn-execution-dash" class="tab-btn text-slate-500 hover:text-slate-700 py-3 px-1 flex items-center space-x-2">
+          <i data-lucide="play-circle" class="w-4 h-4"></i>
+          <span>4. Playwright Test Execution</span>
+        </button>
+
+        <button onclick="switchTab('experiment-log')" id="tab-btn-experiment-log" class="tab-btn text-slate-500 hover:text-slate-700 py-3 px-1 flex items-center space-x-2">
+          <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+          <span>5. Prompt Experiment Log (Faculty)</span>
+          <span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-bold">10</span>
+        </button>
+
+        <button onclick="switchTab('architecture-guide')" id="tab-btn-architecture-guide" class="tab-btn text-slate-500 hover:text-slate-700 py-3 px-1 flex items-center space-x-2">
+          <i data-lucide="layers" class="w-4 h-4"></i>
+          <span>6. System Architecture & SRS</span>
+        </button>
+
+        <button onclick="switchTab('settings')" id="tab-btn-settings" class="tab-btn text-slate-500 hover:text-slate-700 py-3 px-1 flex items-center space-x-2">
+          <i data-lucide="settings" class="w-4 h-4"></i>
+          <span>7. Settings & LLM</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: USER STORIES STUDIO                 -->
+    <!-- ========================================== -->
+    <div id="tab-user-stories" class="tab-content space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Healthcare Application User Stories</h2>
+          <p class="text-sm text-slate-500 mt-1">Preloaded with 17 domain user stories across Patient, Doctor, and Admin roles conforming to the BITS Pilani Project Proposal.</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <select id="filter-story-role" onchange="renderUserStories()" class="text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
+            <option value="all">All Roles (17)</option>
+            <option value="patient">Patient Role (10)</option>
+            <option value="doctor">Doctor Role (5)</option>
+            <option value="admin">Admin & Security (2)</option>
+          </select>
+          <button onclick="openAddStoryModal()" class="flex items-center space-x-1.5 text-sm bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>Add User Story</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- User Story Cards Grid -->
+      <div id="user-stories-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: PROMPT ENGINEERING LAB              -->
+    <!-- ========================================== -->
+    <div id="tab-prompt-lab" class="tab-content hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h2 class="text-xl font-bold text-slate-900">Prompt Engineering Layer</h2>
+        <p class="text-sm text-slate-500 mt-1">Select an Agile User Story, choose a prompt strategy, tune parameters, and generate structured executable test cases covering positive, negative, and edge case scenarios.</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <!-- Left Column: Story & Strategy Selection -->
+          <div class="lg:col-span-1 space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Select User Story</label>
+              <select id="lab-story-select" onchange="onLabStoryChange()" class="w-full text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:ring-2 focus:ring-teal-500">
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">Prompt Strategy</label>
+              <select id="lab-strategy-select" onchange="onLabStrategyChange()" class="w-full text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:ring-2 focus:ring-teal-500">
+                <option value="chain-of-thought">Chain-of-Thought (CoT) Healthcare QA (Recommended)</option>
+                <option value="few-shot">Few-Shot Schema Grounded</option>
+                <option value="edge-case-specialist">Boundary & Concurrency Edge-Case Specialist</option>
+                <option value="security-rbac">Role-Based Security & Permissions Specialist</option>
+                <option value="zero-shot">Zero-Shot Baseline (Comparison)</option>
+              </select>
+              <p id="lab-strategy-desc" class="text-xs text-slate-500 mt-1.5 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                Requires explicit clinical reasoning on patient safety, slot availability, and transaction atomicity before generating tests.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Temperature</label>
+                <input type="range" id="lab-temperature" min="0.0" max="1.0" step="0.1" value="0.3" oninput="document.getElementById('lab-temp-val').innerText = this.value" class="w-full">
+                <div class="flex justify-between text-xs text-slate-400 mt-1">
+                  <span>Exact (0.0)</span>
+                  <span id="lab-temp-val" class="font-bold text-teal-600">0.3</span>
+                  <span>Creative (1.0)</span>
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Provider</label>
+                <select id="lab-provider" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-800">
+                  <option value="builtin">Built-in Clinical Engine (Offline Ready)</option>
+                  <option value="openai">OpenAI (GPT-4o / GPT-4o-mini)</option>
+                </select>
+              </div>
+            </div>
+
+            <button onclick="triggerGeneration()" id="btn-generate" class="w-full py-3 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-semibold rounded-xl shadow-md transition flex items-center justify-center space-x-2">
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+              <span>Generate Structured Test Cases</span>
+            </button>
+          </div>
+
+          <!-- Middle & Right Column: Prompt Inspection & Live Output -->
+          <div class="lg:col-span-2 space-y-4">
+            <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50">
+              <div class="bg-slate-100 px-4 py-2 border-b border-slate-200 flex justify-between items-center text-xs font-semibold text-slate-600">
+                <span>INSPECTED SYSTEM & DOMAIN PROMPT</span>
+                <span class="text-teal-700 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">Auto-Enriched with Healthcare Context</span>
+              </div>
+              <pre id="lab-prompt-preview" class="p-4 text-xs font-mono text-slate-700 overflow-x-auto max-h-48 whitespace-pre-wrap"></pre>
+            </div>
+
+            <!-- Generation Progress / Output Cards -->
+            <div id="generation-results-area" class="border border-slate-200 rounded-xl p-4 bg-white min-h-[260px] flex flex-col justify-center">
+              <div id="gen-empty-state" class="text-center py-8 text-slate-400">
+                <i data-lucide="terminal" class="w-10 h-10 mx-auto text-slate-300 mb-2"></i>
+                <p class="text-sm font-medium">Ready to generate.</p>
+                <p class="text-xs text-slate-400">Select a user story and click "Generate Structured Test Cases".</p>
+              </div>
+
+              <div id="gen-loading-state" class="hidden text-center py-10 space-y-3">
+                <div class="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p class="text-sm font-semibold text-slate-700">Synthesizing Healthcare Scenarios...</p>
+                <p class="text-xs text-slate-500">Applying domain boundaries, slot collision prevention, and RBAC matrix.</p>
+              </div>
+
+              <div id="gen-success-state" class="hidden space-y-4">
+                <div class="flex items-center justify-between border-b pb-3">
+                  <div>
+                    <h3 class="font-bold text-slate-900" id="gen-summary-title">5 Structured Test Cases Generated</h3>
+                    <p class="text-xs text-slate-500" id="gen-summary-subtitle">Strategy: Chain-of-Thought Healthcare QA</p>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <span class="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-lg border border-emerald-200" id="gen-score-badge">Quality Score: 5.0 / 5.0</span>
+                    <button onclick="switchTab('review-board')" class="text-xs bg-teal-600 hover:bg-teal-700 text-white px-3 py-1.5 rounded-lg font-medium transition">Review on Board &rarr;</button>
+                  </div>
+                </div>
+
+                <div id="gen-cases-cards" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                  <!-- Generated cases preview -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: HUMAN REVIEW & APPROVAL BOARD       -->
+    <!-- ========================================== -->
+    <div id="tab-review-board" class="tab-content hidden space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">Human Review & Approval Interface</h2>
+          <p class="text-sm text-slate-500 mt-1">QA engineers critically inspect, edit test steps, flag coverage gaps, add missing edge cases, and approve test cases before execution.</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <select id="filter-review-status" onchange="renderReviewBoard()" class="text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-700">
+            <option value="all">All Statuses</option>
+            <option value="pending_review">Pending Review</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="edited">Edited</option>
+          </select>
+          <select id="filter-review-type" onchange="renderReviewBoard()" class="text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-700">
+            <option value="all">All Scenarios</option>
+            <option value="positive">Positive (Happy Path)</option>
+            <option value="negative">Negative (Validation/Auth)</option>
+            <option value="edge_case">Edge Case (Concurrency/Boundary)</option>
+          </select>
+          <button onclick="batchApproveAll()" class="text-sm bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition">
+            Approve All
+          </button>
+        </div>
+      </div>
+
+      <!-- Test Cases Review Table / Cards -->
+      <div id="review-cards-list" class="space-y-4">
+        <!-- Populated via JavaScript -->
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: AUTOMATED TEST EXECUTION DASHBOARD  -->
+    <!-- ========================================== -->
+    <div id="tab-execution-dash" class="tab-content hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Playwright Automated Test Runner</h2>
+            <p class="text-sm text-slate-500 mt-1">Executes approved healthcare test cases against the reference application and captures full screenshots and pass/fail logs.</p>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-2">
+              <label class="text-xs font-semibold text-slate-600">Target URL:</label>
+              <input type="text" id="run-target-url" value="http://localhost:3000" class="text-xs bg-slate-50 border border-slate-300 rounded px-2 py-1 text-slate-700 w-48">
+            </div>
+            <button onclick="triggerPlaywrightExecution()" id="btn-run-tests" class="flex items-center space-x-2 text-sm bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-md transition">
+              <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+              <span>Execute Approved Test Cases</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6">
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <span class="text-xs font-medium text-slate-500 uppercase">Total Tests</span>
+            <p id="kpi-total-tests" class="text-2xl font-black text-slate-800 mt-1">6</p>
+          </div>
+          <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200">
+            <span class="text-xs font-medium text-emerald-700 uppercase">Passed</span>
+            <p id="kpi-passed-tests" class="text-2xl font-black text-emerald-800 mt-1">6</p>
+          </div>
+          <div class="bg-rose-50 p-4 rounded-xl border border-rose-200">
+            <span class="text-xs font-medium text-rose-700 uppercase">Failed</span>
+            <p id="kpi-failed-tests" class="text-2xl font-black text-rose-800 mt-1">0</p>
+          </div>
+          <div class="bg-teal-50 p-4 rounded-xl border border-teal-200">
+            <span class="text-xs font-medium text-teal-700 uppercase">Pass Rate</span>
+            <p id="kpi-pass-rate" class="text-2xl font-black text-teal-800 mt-1">100%</p>
+          </div>
+          <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-200">
+            <span class="text-xs font-medium text-indigo-700 uppercase">Last Duration</span>
+            <p id="kpi-duration" class="text-2xl font-black text-indigo-800 mt-1">1.8s</p>
+          </div>
+        </div>
+
+        <!-- Execution Progress & Logs -->
+        <div id="execution-status-bar" class="hidden mt-6 p-4 bg-slate-900 text-slate-100 rounded-xl space-y-2 font-mono text-xs">
+          <div class="flex justify-between items-center text-teal-400 font-bold">
+            <span id="exec-status-title">Playwright Browser Active...</span>
+            <span id="exec-status-timer">0ms</span>
+          </div>
+          <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+            <div id="exec-progress-bar" class="bg-teal-500 h-1.5 w-1/3 transition-all duration-300"></div>
+          </div>
+          <div id="exec-live-logs" class="max-h-36 overflow-y-auto space-y-1 text-slate-300 text-[11px] pr-2"></div>
+        </div>
+
+        <!-- Recent Test Runs and Results List -->
+        <div class="mt-8">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-slate-900">Execution Run History & Evidence</h3>
+            <span class="text-xs text-slate-500">Screenshots captured automatically by Playwright</span>
+          </div>
+          <div id="execution-runs-list" class="space-y-4">
+            <!-- Populated via JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: PROMPT ENGINEERING EXPERIMENT LOG   -->
+    <!-- ========================================== -->
+    <div id="tab-experiment-log" class="tab-content hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center space-x-2">
+              <h2 class="text-xl font-bold text-slate-900">Prompt Engineering Experiment Log</h2>
+              <span class="text-xs bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full">Faculty Deliverable</span>
+            </div>
+            <p class="text-sm text-slate-500 mt-1">10 documented iterations across 3 key user stories comparing test case quality across completeness, accuracy, and healthcare domain relevance.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="downloadExperimentLogMarkdown()" class="flex items-center space-x-1.5 text-xs bg-slate-800 hover:bg-slate-900 text-white px-3 py-2 rounded-lg font-medium transition">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Download Faculty Report (.md)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Iterations Table -->
+        <div class="mt-6 overflow-x-auto border border-slate-200 rounded-xl">
+          <table class="min-w-full divide-y divide-slate-200 text-xs">
+            <thead class="bg-slate-50 text-slate-600 font-semibold uppercase">
+              <tr>
+                <th class="px-4 py-3 text-left">Iter #</th>
+                <th class="px-4 py-3 text-left">Target Story</th>
+                <th class="px-4 py-3 text-left">Strategy</th>
+                <th class="px-4 py-3 text-center">Completeness</th>
+                <th class="px-4 py-3 text-center">Accuracy</th>
+                <th class="px-4 py-3 text-center">Domain Relevance</th>
+                <th class="px-4 py-3 text-center">Overall</th>
+                <th class="px-4 py-3 text-left">What Changed & Why</th>
+                <th class="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="experiments-table-body" class="divide-y divide-slate-200 bg-white">
+              <!-- Populated via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 6: SYSTEM ARCHITECTURE & SRS GUIDE    -->
+    <!-- ========================================== -->
+    <div id="tab-architecture-guide" class="tab-content hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">System Architecture & Functional Requirements</h2>
+          <p class="text-sm text-slate-500 mt-1">Detailed documentation of reference healthcare application flows, role-based access matrix, and TestPilot engineering stack.</p>
+        </div>
+
+        <!-- Flowcharts & Role Matrix -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="p-4 bg-teal-50 border border-teal-200 rounded-xl">
+            <h3 class="font-bold text-teal-900 flex items-center space-x-1.5 mb-2">
+              <i data-lucide="user" class="w-4 h-4"></i>
+              <span>Patient Role Workflows</span>
+            </h3>
+            <ul class="text-xs text-teal-800 space-y-1.5 list-disc list-inside">
+              <li>Google OAuth 2.0 authentication (/patient)</li>
+              <li>Doctor search by specialization (Cardiology, Dermatology, etc.)</li>
+              <li>Select consultation date from interactive calendar</li>
+              <li>Book open time slots (09:00:00, 12:00:00, 15:00:00)</li>
+              <li>Stripe payment gateway checkout</li>
+              <li>View upcoming meet link & submit 5-star feedback</li>
+            </ul>
+          </div>
+
+          <div class="p-4 bg-cyan-50 border border-cyan-200 rounded-xl">
+            <h3 class="font-bold text-cyan-900 flex items-center space-x-1.5 mb-2">
+              <i data-lucide="stethoscope" class="w-4 h-4"></i>
+              <span>Doctor Role Workflows</span>
+            </h3>
+            <ul class="text-xs text-cyan-800 space-y-1.5 list-disc list-inside">
+              <li>Credential login (test / test) with bcrypt & JWT HS256</li>
+              <li>Today's schedule view with real-time consultation slots</li>
+              <li>Launch video meeting with patient (Google Meet)</li>
+              <li>Update doctor profile (fees per session, phone number)</li>
+              <li>Review previous consultations & payment history</li>
+              <li>Inspect patient ratings and clinical feedback</li>
+            </ul>
+          </div>
+
+          <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl">
+            <h3 class="font-bold text-indigo-900 flex items-center space-x-1.5 mb-2">
+              <i data-lucide="shield-check" class="w-4 h-4"></i>
+              <span>Admin & Security Workflows</span>
+            </h3>
+            <ul class="text-xs text-indigo-800 space-y-1.5 list-disc list-inside">
+              <li>Onboard verified doctors with clinical credentials</li>
+              <li>Initialize automated slot templates (09:00, 12:00, 15:00)</li>
+              <li>Enforce strict Role-Based Access Control (RBAC)</li>
+              <li>Prevent unauthorized direct URL navigation to /doctor</li>
+              <li>Detect and prevent race-condition double-booking</li>
+              <li>Safeguard patient data and maintain HIPAA hygiene</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Academic Centerpiece: AI vs Human QA Analysis -->
+        <div class="p-5 bg-amber-50 border border-amber-200 rounded-xl space-y-3">
+          <h3 class="font-bold text-amber-900 text-sm flex items-center space-x-2">
+            <i data-lucide="award" class="w-4 h-4"></i>
+            <span>Academic Focus: AI-Generated vs Manually Written Test Cases</span>
+          </h3>
+          <p class="text-xs text-amber-900 leading-relaxed">
+            As outlined in the BITS Pilani project proposal, the academic centerpiece is revealing where AI excels and where it misses in high-stakes healthcare software:
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div class="bg-white p-3 rounded-lg border border-amber-200">
+              <span class="font-bold text-emerald-700">Where AI Excels:</span>
+              <ul class="list-disc list-inside text-slate-700 mt-1 space-y-1">
+                <li>Rapid generation of comprehensive combinatorial boundary test cases (e.g. leap years, timezone offsets).</li>
+                <li>Instant schema formatting into executable Playwright step arrays.</li>
+                <li>Adversarial thinking: discovering edge-case race conditions (two patients booking slot 09:00:00 simultaneously).</li>
+              </ul>
+            </div>
+            <div class="bg-white p-3 rounded-lg border border-amber-200">
+              <span class="font-bold text-rose-700">Where AI Misses (Why Human Review is Vital):</span>
+              <ul class="list-disc list-inside text-slate-700 mt-1 space-y-1">
+                <li>Hallucinating UI capabilities not in the codebase (e.g. inventing drag-and-drop calendars in naive prompts).</li>
+                <li>Over-optimistic assertions that assume third-party APIs (Stripe, Google Meet) never fail.</li>
+                <li>Incomplete knowledge of custom backend token salting schemes without codebase grounding.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 7: SETTINGS & LLM CONFIGURATION        -->
+    <!-- ========================================== -->
+    <div id="tab-settings" class="tab-content hidden space-y-6">
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm max-w-2xl">
+        <h2 class="text-xl font-bold text-slate-900">Settings & LLM Configuration</h2>
+        <p class="text-sm text-slate-500 mt-1">Configure API keys, model provider, and target URLs for the application under test.</p>
+
+        <form id="settings-form" onsubmit="saveSettings(event)" class="mt-6 space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">LLM Provider</label>
+            <select id="setting-provider" class="w-full text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800">
+              <option value="builtin">Built-In Clinical Engine (Offline / Zero-Config)</option>
+              <option value="openai">OpenAI API (GPT-4o / GPT-4o-mini)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">OpenAI API Key (Optional)</label>
+            <input type="password" id="setting-openai-key" placeholder="sk-..." class="w-full text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800">
+            <span class="text-[11px] text-slate-400">Leave blank to use the Built-In Clinical Test Generation Engine.</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">AUT Frontend URL</label>
+              <input type="text" id="setting-fe-url" value="http://localhost:3000" class="w-full text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">AUT Backend URL</label>
+              <input type="text" id="setting-be-url" value="http://localhost:5000" class="w-full text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800">
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2 pt-2">
+            <input type="checkbox" id="setting-headless" checked class="rounded text-teal-600">
+            <label for="setting-headless" class="text-sm text-slate-700">Run Playwright in Headless Browser Mode</label>
+          </div>
+
+          <div class="pt-4">
+            <button type="submit" class="bg-teal-600 hover:bg-teal-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-sm transition">
+              Save Configuration
+            </button>
+            <span id="settings-saved-msg" class="text-xs text-emerald-600 font-medium ml-3 hidden">Settings Saved Successfully!</span>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Edit Test Case Modal -->
+  <div id="modal-edit-tc" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-slate-900" id="modal-tc-title">Edit Test Case</h3>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="space-y-3">
+        <input type="hidden" id="edit-tc-id">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Title</label>
+          <input type="text" id="edit-tc-name" class="w-full text-sm border border-slate-300 rounded-lg p-2">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Description</label>
+          <textarea id="edit-tc-desc" rows="2" class="w-full text-sm border border-slate-300 rounded-lg p-2"></textarea>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Scenario Type</label>
+            <select id="edit-tc-type" class="w-full text-sm border border-slate-300 rounded-lg p-2">
+              <option value="positive">Positive</option>
+              <option value="negative">Negative</option>
+              <option value="edge_case">Edge Case</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Priority</label>
+            <select id="edit-tc-priority" class="w-full text-sm border border-slate-300 rounded-lg p-2">
+              <option value="Critical">Critical</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Reviewer Audit Notes / Flagged Gaps</label>
+          <input type="text" id="edit-tc-notes" placeholder="e.g. Added concurrency assertion per clinical guidelines" class="w-full text-sm border border-slate-300 rounded-lg p-2">
+        </div>
+      </div>
+      <div class="flex justify-end space-x-2 pt-3 border-t">
+        <button onclick="closeEditModal()" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg">Cancel</button>
+        <button onclick="saveTestCaseEdit()" class="px-5 py-2 text-sm bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg">Save & Mark Edited</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Client JavaScript Logic -->
+  <script>
+    // State storage
+    let state = {
+      userStories: [],
+      testCases: [],
+      experiments: [],
+      executionRuns: [],
+      settings: {},
+      strategies: {}
+    };
+
+    // Initialization
+    document.addEventListener('DOMContentLoaded', async () => {
+      lucide.createIcons();
+      await fetchAllData();
+      checkAutStatus();
+      setInterval(checkAutStatus, 15000);
+    });
+
+    async function fetchAllData() {
+      try {
+        const [storiesRes, tcRes, expRes, runsRes, settRes, stratRes] = await Promise.all([
+          fetch('/api/user-stories').then(r => r.json()),
+          fetch('/api/test-cases').then(r => r.json()),
+          fetch('/api/experiments').then(r => r.json()),
+          fetch('/api/execution-runs').then(r => r.json()),
+          fetch('/api/settings').then(r => r.json()),
+          fetch('/api/prompt-strategies').then(r => r.json())
+        ]);
+
+        state.userStories = storiesRes;
+        state.testCases = tcRes;
+        state.experiments = expRes;
+        state.executionRuns = runsRes;
+        state.settings = settRes;
+        state.strategies = stratRes;
+
+        renderUserStories();
+        populateLabDropdowns();
+        renderReviewBoard();
+        renderExecutionDashboard();
+        renderExperimentTable();
+        populateSettingsForm();
+        updateHeaderBadges();
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+    }
+
+    function updateHeaderBadges() {
+      document.getElementById('badge-story-count').innerText = state.userStories.length;
+      const approvedCount = state.testCases.filter(t => t.status === 'approved').length;
+      document.getElementById('badge-approved-count').innerText = approvedCount;
+    }
+
+    // Switch Tabs
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('tab-active');
+        btn.classList.add('text-slate-500');
+      });
+
+      const targetTab = document.getElementById(`tab-${tabId}`);
+      const targetBtn = document.getElementById(`tab-btn-${tabId}`);
+      if (targetTab) targetTab.classList.remove('hidden');
+      if (targetBtn) {
+        targetBtn.classList.add('tab-active');
+        targetBtn.classList.remove('text-slate-500');
+      }
+      lucide.createIcons();
+    }
+
+    // User Stories Renderer
+    function renderUserStories() {
+      const filter = document.getElementById('filter-story-role')?.value || 'all';
+      const container = document.getElementById('user-stories-list');
+      if (!container) return;
+
+      let list = state.userStories;
+      if (filter !== 'all') {
+        list = list.filter(s => s.role === filter);
+      }
+
+      container.innerHTML = list.map(story => `
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-xs font-mono font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">${story.id}</span>
+              <span class="text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded-full ${story.role === 'patient' ? 'bg-sky-50 text-sky-700' : story.role === 'doctor' ? 'bg-indigo-50 text-indigo-700' : 'bg-purple-50 text-purple-700'}">${story.role}</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-sm mb-1">${story.title}</h3>
+            <p class="text-xs text-slate-600 italic mb-3">"${story.story}"</p>
+            <div class="space-y-1 text-[11px] text-slate-500 border-t pt-2">
+              <span class="font-semibold text-slate-700 block">Acceptance Criteria:</span>
+              <ul class="list-disc list-inside space-y-0.5">
+                ${(story.acceptanceCriteria || []).slice(0, 3).map(c => `<li>${c}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t flex justify-between items-center">
+            <span class="text-xs text-slate-400">${story.module || 'Core'}</span>
+            <button onclick="selectStoryForLab('${story.id}')" class="text-xs bg-slate-100 hover:bg-teal-50 text-slate-700 hover:text-teal-700 font-medium px-3 py-1.5 rounded-lg border border-slate-200 transition flex items-center space-x-1">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>Generate Tests</span>
+            </button>
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    // Prompt Lab Logic
+    function populateLabDropdowns() {
+      const select = document.getElementById('lab-story-select');
+      if (!select) return;
+      select.innerHTML = state.userStories.map(s => `
+        <option value="${s.id}">[${s.id}] (${s.role.toUpperCase()}) ${s.title}</option>
+      `).join('');
+
+      onLabStoryChange();
+    }
+
+    function selectStoryForLab(storyId) {
+      switchTab('prompt-lab');
+      const select = document.getElementById('lab-story-select');
+      if (select) {
+        select.value = storyId;
+        onLabStoryChange();
+      }
+    }
+
+    function onLabStoryChange() {
+      const storyId = document.getElementById('lab-story-select')?.value;
+      const story = state.userStories.find(s => s.id === storyId);
+      const strategyKey = document.getElementById('lab-strategy-select')?.value || 'chain-of-thought';
+      updatePromptPreview(story, strategyKey);
+    }
+
+    function onLabStrategyChange() {
+      const strategyKey = document.getElementById('lab-strategy-select')?.value;
+      const strategy = state.strategies[strategyKey];
+      if (strategy) {
+        document.getElementById('lab-strategy-desc').innerText = strategy.description;
+      }
+      onLabStoryChange();
+    }
+
+    function updatePromptPreview(story, strategyKey) {
+      if (!story) return;
+      const strategy = state.strategies[strategyKey] || state.strategies['chain-of-thought'];
+      if (!strategy) return;
+
+      const preview = `[SYSTEM PROMPT]:
+${strategy.systemTemplate.replace(/{role}/g, story.role)}
+
+[USER PROMPT]:
+${strategy.userTemplate
+  .replace(/{user_story}/g, story.story)
+  .replace(/{role}/g, story.role)
+  .replace(/{module}/g, story.module || 'Core')
+  .replace(/{acceptance_criteria}/g, (story.acceptanceCriteria || []).map((c, i) => `${i + 1}. ${c}`).join('\n'))}`;
+
+      document.getElementById('lab-prompt-preview').innerText = preview;
+    }
+
+    async function triggerGeneration() {
+      const storyId = document.getElementById('lab-story-select')?.value;
+      const strategyKey = document.getElementById('lab-strategy-select')?.value;
+      const temperature = parseFloat(document.getElementById('lab-temperature')?.value || 0.3);
+      const provider = document.getElementById('lab-provider')?.value || 'builtin';
+
+      document.getElementById('gen-empty-state').classList.add('hidden');
+      document.getElementById('gen-success-state').classList.add('hidden');
+      document.getElementById('gen-loading-state').classList.remove('hidden');
+
+      try {
+        const response = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userStoryId: storyId,
+            strategyKey,
+            settings: { temperature, provider }
+          })
+        });
+
+        const data = await response.json();
+        document.getElementById('gen-loading-state').classList.add('hidden');
+
+        if (data.success) {
+          document.getElementById('gen-success-state').classList.remove('hidden');
+          document.getElementById('gen-summary-title').innerText = `${data.testCases.length} Structured Test Cases Generated`;
+          document.getElementById('gen-summary-subtitle').innerText = `Strategy: ${data.generationDetails.strategyName}`;
+          document.getElementById('gen-score-badge').innerText = `Quality Score: ${data.generationDetails.ratings.overallScore} / 5.0`;
+
+          const container = document.getElementById('gen-cases-cards');
+          container.innerHTML = data.testCases.map(tc => `
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1.5 text-xs">
+              <div class="flex justify-between items-center">
+                <span class="font-bold text-slate-800">${tc.id}: ${tc.title}</span>
+                <span class="px-2 py-0.5 rounded text-[11px] font-semibold uppercase ${tc.scenarioType === 'positive' ? 'badge-positive' : tc.scenarioType === 'negative' ? 'badge-negative' : 'badge-edge'}">${tc.scenarioType}</span>
+              </div>
+              <p class="text-slate-600">${tc.description}</p>
+              <div class="text-[11px] text-slate-500 font-mono bg-white p-2 rounded border border-slate-100">
+                <strong>Expected Outcome:</strong> ${tc.expectedResult}
+              </div>
+            </div>
+          `).join('');
+
+          // Refresh test cases list & badges
+          state.testCases = await fetch('/api/test-cases').then(r => r.json());
+          state.experiments = await fetch('/api/experiments').then(r => r.json());
+          renderReviewBoard();
+          renderExperimentTable();
+          updateHeaderBadges();
+        }
+      } catch (err) {
+        alert("Generation error: " + err.message);
+        document.getElementById('gen-loading-state').classList.add('hidden');
+        document.getElementById('gen-empty-state').classList.remove('hidden');
+      }
+    }
+
+    // Review Board Renderer
+    function renderReviewBoard() {
+      const filterStatus = document.getElementById('filter-review-status')?.value || 'all';
+      const filterType = document.getElementById('filter-review-type')?.value || 'all';
+      const container = document.getElementById('review-cards-list');
+      if (!container) return;
+
+      let list = state.testCases;
+      if (filterStatus !== 'all') list = list.filter(tc => tc.status === filterStatus);
+      if (filterType !== 'all') list = list.filter(tc => tc.scenarioType === filterType);
+
+      if (list.length === 0) {
+        container.innerHTML = `<div class="bg-white p-8 rounded-2xl text-center text-slate-400 border border-slate-200">No test cases matching current filters.</div>`;
+        return;
+      }
+
+      container.innerHTML = list.map(tc => `
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3">
+            <div class="flex items-center space-x-2">
+              <span class="font-mono font-bold text-slate-900">${tc.id}</span>
+              <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold uppercase ${tc.scenarioType === 'positive' ? 'badge-positive' : tc.scenarioType === 'negative' ? 'badge-negative' : 'badge-edge'}">${tc.scenarioType}</span>
+              <span class="text-xs text-slate-400">| Priority: <strong class="text-slate-700">${tc.priority}</strong></span>
+              <span class="text-xs text-slate-400">| Role: <strong class="text-slate-700 uppercase">${tc.role}</strong></span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-semibold px-2 py-0.5 rounded ${tc.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : tc.status === 'rejected' ? 'bg-rose-100 text-rose-800' : tc.status === 'edited' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'}">Status: ${tc.status.replace('_', ' ').toUpperCase()}</span>
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-bold text-slate-900 text-sm">${tc.title}</h3>
+            <p class="text-xs text-slate-600 mt-0.5">${tc.description}</p>
+          </div>
+
+          <!-- Preconditions & Steps Table -->
+          <div class="space-y-2 text-xs">
+            <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-slate-600">
+              <span class="font-bold text-slate-700">Preconditions:</span>
+              <ul class="list-disc list-inside mt-0.5">
+                ${(tc.preconditions || []).map(p => `<li>${p}</li>`).join('')}
+              </ul>
+            </div>
+
+            <div class="overflow-x-auto border border-slate-200 rounded-lg">
+              <table class="min-w-full divide-y divide-slate-200 text-[11px]">
+                <thead class="bg-slate-50 text-slate-600 font-semibold uppercase">
+                  <tr>
+                    <th class="px-3 py-2 text-left w-12">Step</th>
+                    <th class="px-3 py-2 text-left">Action</th>
+                    <th class="px-3 py-2 text-left">Test Data</th>
+                    <th class="px-3 py-2 text-left">Expected Step Result</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white">
+                  ${(tc.steps || []).map(s => `
+                    <tr>
+                      <td class="px-3 py-2 font-mono text-slate-500">${s.stepNumber}</td>
+                      <td class="px-3 py-2 text-slate-800 font-medium">${s.action}</td>
+                      <td class="px-3 py-2 font-mono text-slate-600">${s.testData}</td>
+                      <td class="px-3 py-2 text-slate-700">${s.expectedResult}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <div class="bg-teal-50/50 p-2.5 rounded-lg border border-teal-200 text-xs text-teal-900">
+              <strong>Overall Expected Result:</strong> ${tc.expectedResult}
+            </div>
+
+            ${tc.reviewNotes ? `
+              <div class="text-[11px] bg-amber-50 p-2 rounded border border-amber-200 text-amber-900">
+                <strong>Reviewer Notes:</strong> ${tc.reviewNotes}
+              </div>
+            ` : ''}
+          </div>
+
+          <!-- Human Review Actions -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t">
+            <div class="flex items-center space-x-2">
+              <button onclick="openEditModal('${tc.id}')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition flex items-center space-x-1">
+                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                <span>Edit Steps</span>
+              </button>
+              <button onclick="flagGap('${tc.id}')" class="text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 px-3 py-1.5 rounded-lg font-medium border border-amber-200 transition flex items-center space-x-1">
+                <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                <span>Flag Gaps</span>
+              </button>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <button onclick="reviewTestCase('${tc.id}', 'reject')" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 px-3 py-1.5 rounded-lg font-medium border border-rose-200 transition">
+                Reject
+              </button>
+              <button onclick="reviewTestCase('${tc.id}', 'approve')" class="text-xs bg-teal-600 hover:bg-teal-700 text-white px-4 py-1.5 rounded-lg font-medium shadow-sm transition">
+                Approve
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    async function reviewTestCase(id, action) {
+      let notes = '';
+      if (action === 'reject') {
+        notes = prompt("Enter reason for rejection (e.g. unfeasible assertion, hallucinated endpoint):");
+        if (notes === null) return;
+      }
+      try {
+        await fetch(`/api/test-cases/${id}/review`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action, reviewNotes: notes })
+        });
+        state.testCases = await fetch('/api/test-cases').then(r => r.json());
+        renderReviewBoard();
+        updateHeaderBadges();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function batchApproveAll() {
+      try {
+        await fetch('/api/test-cases/batch-approve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        state.testCases = await fetch('/api/test-cases').then(r => r.json());
+        renderReviewBoard();
+        updateHeaderBadges();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    function flagGap(id) {
+      const gap = prompt("Specify the missing scenario or test gap (e.g. Test network drop during Stripe checkout):");
+      if (!gap) return;
+      reviewTestCase(id, 'flag_gap');
+    }
+
+    // Modal Edit Logic
+    function openEditModal(id) {
+      const tc = state.testCases.find(t => t.id === id);
+      if (!tc) return;
+      document.getElementById('edit-tc-id').value = tc.id;
+      document.getElementById('modal-tc-title').innerText = `Edit ${tc.id}: ${tc.title}`;
+      document.getElementById('edit-tc-name').value = tc.title;
+      document.getElementById('edit-tc-desc').value = tc.description;
+      document.getElementById('edit-tc-type').value = tc.scenarioType;
+      document.getElementById('edit-tc-priority').value = tc.priority;
+      document.getElementById('edit-tc-notes').value = tc.reviewNotes || '';
+      document.getElementById('modal-edit-tc').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+      document.getElementById('modal-edit-tc').classList.add('hidden');
+    }
+
+    async function saveTestCaseEdit() {
+      const id = document.getElementById('edit-tc-id').value;
+      const title = document.getElementById('edit-tc-name').value;
+      const description = document.getElementById('edit-tc-desc').value;
+      const scenarioType = document.getElementById('edit-tc-type').value;
+      const priority = document.getElementById('edit-tc-priority').value;
+      const reviewNotes = document.getElementById('edit-tc-notes').value;
+
+      try {
+        await fetch(`/api/test-cases/${id}/review`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'edit',
+            reviewNotes,
+            edits: { title, description, scenarioType, priority }
+          })
+        });
+        closeEditModal();
+        state.testCases = await fetch('/api/test-cases').then(r => r.json());
+        renderReviewBoard();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Execution Runner & Dashboard
+    async function triggerPlaywrightExecution() {
+      const btn = document.getElementById('btn-run-tests');
+      const statusBar = document.getElementById('execution-status-bar');
+      const liveLogs = document.getElementById('exec-live-logs');
+      const progressBar = document.getElementById('exec-progress-bar');
+      const targetUrl = document.getElementById('run-target-url')?.value;
+
+      btn.disabled = true;
+      btn.classList.add('opacity-50');
+      statusBar.classList.remove('hidden');
+      liveLogs.innerHTML = `<div>[${new Date().toLocaleTimeString()}] Spawning Playwright Chromium headless runner...</div>`;
+      progressBar.style.width = '25%';
+
+      try {
+        const response = await fetch('/api/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ targetUrl })
+        });
+        progressBar.style.width = '75%';
+
+        const data = await response.json();
+        progressBar.style.width = '100%';
+
+        if (data.success) {
+          liveLogs.innerHTML += `<div>[${new Date().toLocaleTimeString()}] Batch execution completed. Processed ${data.runReport.totalCases} test cases.</div>`;
+          state.executionRuns = await fetch('/api/execution-runs').then(r => r.json());
+          renderExecutionDashboard();
+        } else {
+          liveLogs.innerHTML += `<div class="text-rose-400">Error: ${data.error}</div>`;
+        }
+      } catch (err) {
+        liveLogs.innerHTML += `<div class="text-rose-400">Execution failed: ${err.message}</div>`;
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50');
+      }
+    }
+
+    function renderExecutionDashboard() {
+      const runs = state.executionRuns;
+      const latestRun = runs[0];
+
+      if (latestRun) {
+        document.getElementById('kpi-total-tests').innerText = latestRun.totalCases;
+        document.getElementById('kpi-passed-tests').innerText = latestRun.passedCases;
+        document.getElementById('kpi-failed-tests').innerText = latestRun.failedCases;
+        const rate = latestRun.totalCases > 0 ? Math.round((latestRun.passedCases / latestRun.totalCases) * 100) : 100;
+        document.getElementById('kpi-pass-rate').innerText = `${rate}%`;
+        document.getElementById('kpi-duration').innerText = `${(latestRun.durationMs / 1000).toFixed(1)}s`;
+      }
+
+      const container = document.getElementById('execution-runs-list');
+      if (!container) return;
+
+      if (runs.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-slate-400 bg-slate-50 rounded-xl border">No test runs executed yet. Click "Execute Approved Test Cases" above to launch Playwright!</div>`;
+        return;
+      }
+
+      container.innerHTML = runs.map(run => `
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+          <div class="flex justify-between items-center text-xs border-b pb-2">
+            <span class="font-mono font-bold text-slate-700">${run.id} &bull; ${new Date(run.timestamp).toLocaleString()}</span>
+            <span class="font-semibold px-2 py-0.5 rounded ${run.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${run.status}</span>
+          </div>
+
+          <!-- Per-test results inside this run -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+            ${(run.testCaseResults || []).map(r => `
+              <div class="bg-white p-3 rounded-lg border border-slate-200 flex items-start justify-between">
+                <div class="space-y-1">
+                  <div class="flex items-center space-x-1.5">
+                    <span class="w-2 h-2 rounded-full ${r.status === 'PASSED' ? 'bg-emerald-500' : 'bg-rose-500'}"></span>
+                    <span class="font-bold text-slate-800">${r.testCaseId}: ${r.title}</span>
+                  </div>
+                  <p class="text-[11px] text-slate-500">Duration: ${r.durationMs}ms | Scenario: <span class="uppercase">${r.scenarioType}</span></p>
+                </div>
+                ${r.screenshotUrl ? `
+                  <a href="${r.screenshotUrl}" target="_blank" class="ml-2 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded border flex items-center space-x-1">
+                    <i data-lucide="image" class="w-3.5 h-3.5"></i>
+                    <span>Screenshot</span>
+                  </a>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    // Experiment Log Renderer (Faculty Deliverable)
+    function renderExperimentTable() {
+      const tbody = document.getElementById('experiments-table-body');
+      if (!tbody) return;
+
+      tbody.innerHTML = state.experiments.map(exp => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="px-4 py-3 font-mono font-bold text-slate-700">#${exp.iterationNumber}</td>
+          <td class="px-4 py-3">
+            <span class="font-bold text-slate-800 block">${exp.targetStoryTitle}</span>
+            <span class="text-[10px] text-slate-400 font-mono">${exp.targetStoryId} (${exp.role.toUpperCase()})</span>
+          </td>
+          <td class="px-4 py-3 font-medium text-teal-800">${exp.promptStrategy}</td>
+          <td class="px-4 py-3 text-center"><span class="font-bold">${exp.ratings.completeness}</span>/5</td>
+          <td class="px-4 py-3 text-center"><span class="font-bold">${exp.ratings.accuracy}</span>/5</td>
+          <td class="px-4 py-3 text-center"><span class="font-bold">${exp.ratings.healthcareRelevance}</span>/5</td>
+          <td class="px-4 py-3 text-center">
+            <span class="px-2 py-0.5 rounded font-bold ${exp.ratings.overallScore >= 4.5 ? 'bg-emerald-100 text-emerald-800' : exp.ratings.overallScore >= 3.5 ? 'bg-teal-100 text-teal-800' : 'bg-amber-100 text-amber-800'}">
+              ${exp.ratings.overallScore}
+            </span>
+          </td>
+          <td class="px-4 py-3 max-w-xs truncate text-slate-600" title="${exp.whatChanged} - ${exp.whyItChanged}">
+            <strong>${exp.whatChanged}</strong>
+            <span class="text-slate-400 block">${exp.whyItChanged}</span>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <button onclick="viewExperimentDetail('${exp.id}')" class="text-teal-600 hover:text-teal-800 font-medium">Inspect</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function viewExperimentDetail(id) {
+      const exp = state.experiments.find(e => e.id === id);
+      if (!exp) return;
+      alert(`[Iteration #${exp.iterationNumber}] ${exp.promptStrategy}\n\nModel: ${exp.model} (Temp: ${exp.temperature})\nTarget: ${exp.targetStoryTitle}\n\nScores:\n- Completeness: ${exp.ratings.completeness}/5\n- Accuracy: ${exp.ratings.accuracy}/5\n- Domain Relevance: ${exp.ratings.healthcareRelevance}/5\n\nWhat Changed & Why:\n${exp.whatChanged}\n${exp.whyItChanged}\n\nKey Takeaway:\n${exp.keyFindings}`);
+    }
+
+    function downloadExperimentLogMarkdown() {
+      let md = `# TestPilot - Prompt Engineering Experiment Log\n`;
+      md += `**Course**: BITS Pilani BSDCH ZC229T Design Project Proposal\n`;
+      md += `**Date**: ${new Date().toLocaleDateString()}\n\n`;
+      md += `| Iter # | Target User Story | Strategy | Completeness (1-5) | Accuracy (1-5) | Domain Relevance (1-5) | Overall | What Changed & Why |\n`;
+      md += `|---|---|---|---|---|---|---|---|\n`;
+
+      state.experiments.forEach(e => {
+        md += `| #${e.iterationNumber} | ${e.targetStoryTitle} | ${e.promptStrategy} | ${e.ratings.completeness} | ${e.ratings.accuracy} | ${e.ratings.healthcareRelevance} | ${e.ratings.overallScore} | ${e.whatChanged.replace(/\|/g, '-')} - ${e.whyItChanged.replace(/\|/g, '-')} |\n`;
+      });
+
+      const blob = new Blob([md], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `TestPilot_Prompt_Engineering_Log_${Date.now()}.md`;
+      a.click();
+    }
+
+    // AUT Status Checker
+    async function checkAutStatus() {
+      try {
+        const res = await fetch('/api/aut-status').then(r => r.json());
+        const feDot = document.getElementById('fe-status-dot');
+        const feText = document.getElementById('fe-status-text');
+        const beDot = document.getElementById('be-status-dot');
+        const beText = document.getElementById('be-status-text');
+
+        if (res.frontend.online) {
+          feDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+          feText.innerText = "ONLINE";
+          feText.className = "text-emerald-700 font-bold";
+        } else {
+          feDot.className = "w-2.5 h-2.5 rounded-full bg-rose-400";
+          feText.innerText = "OFFLINE";
+          feText.className = "text-rose-600";
+        }
+
+        if (res.backend.online) {
+          beDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+          beText.innerText = "ONLINE";
+          beText.className = "text-emerald-700 font-bold";
+        } else {
+          beDot.className = "w-2.5 h-2.5 rounded-full bg-rose-400";
+          beText.innerText = "OFFLINE";
+          beText.className = "text-rose-600";
+        }
+      } catch (e) {
+        console.warn("AUT check failed:", e);
+      }
+    }
+
+    // Settings Logic
+    function populateSettingsForm() {
+      const s = state.settings;
+      if (document.getElementById('setting-provider')) document.getElementById('setting-provider').value = s.provider || 'builtin';
+      if (document.getElementById('setting-openai-key')) document.getElementById('setting-openai-key').value = s.openaiKey || '';
+      if (document.getElementById('setting-fe-url')) document.getElementById('setting-fe-url').value = s.targetAutFrontendUrl || 'http://localhost:3000';
+      if (document.getElementById('setting-be-url')) document.getElementById('setting-be-url').value = s.targetAutBackendUrl || 'http://localhost:5000';
+      if (document.getElementById('setting-headless')) document.getElementById('setting-headless').checked = s.headless !== false;
+    }
+
+    async function saveSettings(e) {
+      e.preventDefault();
+      const payload = {
+        provider: document.getElementById('setting-provider').value,
+        openaiKey: document.getElementById('setting-openai-key').value,
+        targetAutFrontendUrl: document.getElementById('setting-fe-url').value,
+        targetAutBackendUrl: document.getElementById('setting-be-url').value,
+        headless: document.getElementById('setting-headless').checked
+      };
+      try {
+        const res = await fetch('/api/settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        state.settings = await res.json();
+        const msg = document.getElementById('settings-saved-msg');
+        msg.classList.remove('hidden');
+        setTimeout(() => msg.classList.add('hidden'), 3000);
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function resetSeedData() {
+      if (!confirm("Reset all test cases, experiments, and stories back to default project seeds?")) return;
+      await fetch('/api/reset-data', { method: 'POST' });
+      await fetchAllData();
+      alert("Database reset to pristine seed state!");
+    }
+  </script>
+</body>
+</html>

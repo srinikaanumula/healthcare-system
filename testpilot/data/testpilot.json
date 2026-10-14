@@ -1,0 +1,1781 @@
+{
+  "userStories": [
+    {
+      "id": "US-PAT-001",
+      "role": "patient",
+      "module": "Authentication & Onboarding",
+      "title": "Patient Registration and Profile Initialization",
+      "story": "As a new patient, I want to create an account with my basic personal information so that I can schedule medical consultations.",
+      "acceptanceCriteria": [
+        "The system shall accept patient name, contact email, and valid phone number.",
+        "The system shall prevent duplicate registration with the same contact identifier.",
+        "The patient profile shall be stored in the database with an initial unverified status until first login.",
+        "A confirmation greeting and default profile dashboard shall be displayed upon successful creation."
+      ],
+      "priority": "High",
+      "createdAt": "2026-10-10T10:00:00Z"
+    },
+    {
+      "id": "US-PAT-002",
+      "role": "patient",
+      "module": "Authentication",
+      "title": "Patient Google OAuth Login",
+      "story": "As a registered patient, I want to log in using my Google account so that I can securely and seamlessly access my patient portal without remembering extra passwords.",
+      "acceptanceCriteria": [
+        "Clicking 'Login As A Patient' shall initiate the Google OAuth 2.0 authorization sequence.",
+        "The system shall decode the JWT token (sub, name, email, picture) using the configured algorithm.",
+        "A valid token shall transition the patient to the Patient Dashboard (/patient).",
+        "If Google authentication fails or is cancelled, a clear error notification shall be rendered without system crash."
+      ],
+      "priority": "Critical",
+      "createdAt": "2026-10-10T10:15:00Z"
+    },
+    {
+      "id": "US-PAT-003",
+      "role": "patient",
+      "module": "Doctor Discovery",
+      "title": "Search and Browse Doctors by Specialty",
+      "story": "As a patient, I want to search and filter doctors by medical specialization (e.g. Cardiology, Dermatology, Pathology) so that I find the right healthcare specialist for my symptoms.",
+      "acceptanceCriteria": [
+        "The search bar shall support case-insensitive autocomplete matching doctor specialization and name.",
+        "Matching doctor cards shall display full name, specialty, phone contact, and consultation fee per session.",
+        "A 'Book' call-to-action button shall be visible on each qualified doctor card.",
+        "If no doctor matches the query, a friendly 'No specialist found' fallback message shall be shown."
+      ],
+      "priority": "High",
+      "createdAt": "2026-10-10T10:30:00Z"
+    },
+    {
+      "id": "US-PAT-004",
+      "role": "patient",
+      "module": "Appointment Booking",
+      "title": "Doctor Consultation Date Selection",
+      "story": "As a patient, I want to browse an interactive calendar and pick a future consultation date so that I can schedule a visit at my convenience.",
+      "acceptanceCriteria": [
+        "The calendar shall visually disable and disallow selection of past dates.",
+        "Clicking a valid future date shall highlight the day and persist the chosen date string (YYYY-MM-DD).",
+        "A 'Confirm And Go to Next Step' button shall remain disabled until a valid date is picked.",
+        "Navigating forward shall transition the user to the Slot Selection screen."
+      ],
+      "priority": "High",
+      "createdAt": "2026-10-10T11:00:00Z"
+    },
+    {
+      "id": "US-PAT-005",
+      "role": "patient",
+      "module": "Appointment Booking",
+      "title": "Time Slot Selection & Collision Prevention",
+      "story": "As a patient, I want to view available consultation slots (09:00:00, 12:00:00, 15:00:00) for my selected doctor and date, and book an open slot so that I am assured consultation time.",
+      "acceptanceCriteria": [
+        "The system shall query the doctor's dateSchedule and display slot statuses in real time.",
+        "Available slots shall display an active 'Book Slot' button.",
+        "Already booked slots (isBooked = true) shall be disabled or clearly marked as unavailable.",
+        "Selecting an open slot shall temporarily reserve it and proceed to the Payment stage."
+      ],
+      "priority": "Critical",
+      "createdAt": "2026-10-10T11:30:00Z"
+    },
+    {
+      "id": "US-PAT-006",
+      "role": "patient",
+      "module": "Billing & Payment",
+      "title": "Consultation Fee Payment Checkout",
+      "story": "As a patient, I want to pay the consultation fee through a secure online payment interface so that my appointment booking is officially confirmed.",
+      "acceptanceCriteria": [
+        "The payment receipt shall itemize Doctor Name, Specialization, Consultation Fee, Tax, and Grand Total.",
+        "Clicking 'Pay Now' shall launch the secured payment dialog.",
+        "The system shall validate postal code and test card numbers before processing transaction.",
+        "Upon successful charge, an appointment record shall be written to the database with a transaction identifier."
+      ],
+      "priority": "High",
+      "createdAt": "2026-10-10T12:00:00Z"
+    },
+    {
+      "id": "US-PAT-007",
+      "role": "patient",
+      "module": "Telehealth & Notifications",
+      "title": "Virtual Meeting Link Generation & Appointment Confirmation",
+      "story": "As a patient, I want to receive an appointment confirmation with a Google Meet or teleconsultation link so that I can join the remote doctor consultation.",
+      "acceptanceCriteria": [
+        "Upon successful slot booking and payment, a unique teleconsultation link shall be associated with the appointment.",
+        "The link shall appear under 'Appointment Status' on the Patient Dashboard.",
+        "Clicking 'Join Meet' shall open the secure meeting in a new browser tab.",
+        "The consultation status shall reflect 'Scheduled' and sync with the doctor's agenda."
+      ],
+      "priority": "High",
+      "createdAt": "2026-10-10T12:30:00Z"
+    },
+    {
+      "id": "US-PAT-008",
+      "role": "patient",
+      "module": "Patient Records",
+      "title": "Appointment History & Status Tracking",
+      "story": "As a patient, I want to view a chronological history of my previous appointments and active bookings so that I can keep track of my medical history.",
+      "acceptanceCriteria": [
+        "The 'Appointment Status' sub-interface shall show current/upcoming appointments with date, time, and doctor name.",
+        "The 'Previous Appointments' sub-interface shall display past appointments with consultation dates.",
+        "Patients shall have an option to navigate to doctor feedback from past appointment entries."
+      ],
+      "priority": "Medium",
+      "createdAt": "2026-10-10T13:00:00Z"
+    },
+    {
+      "id": "US-PAT-009",
+      "role": "patient",
+      "module": "Quality & Feedback",
+      "title": "Patient Feedback & Star Rating Submission",
+      "story": "As a patient, I want to submit a 1 to 5 star rating and written review for a completed consultation so that I can evaluate the care provided.",
+      "acceptanceCriteria": [
+        "A feedback form shall be accessible only for previous appointments that have concluded.",
+        "The form shall accept a star rating between 1 and 5, a feedback title, and detailed review text.",
+        "Submitting feedback shall update the appointment record (`feedback.given = true`, `feedback.stars = X`).",
+        "A patient cannot submit duplicate feedback for the same completed appointment."
+      ],
+      "priority": "Medium",
+      "createdAt": "2026-10-10T13:30:00Z"
+    },
+    {
+      "id": "US-PAT-010",
+      "role": "patient",
+      "module": "Profile Management",
+      "title": "Patient Contact Phone Number Update",
+      "story": "As a patient, I want to update my contact phone number on my profile so that doctors and hospital staff can reach me in case of urgent consultation rescheduling.",
+      "acceptanceCriteria": [
+        "The phone update sub-interface shall validate the phone number to be a valid 10-digit format.",
+        "Submitting a valid number shall issue a PUT request to /patients/update-phone.",
+        "The profile view shall immediately reflect the updated phone number.",
+        "Invalid or empty phone inputs shall display inline validation error messages."
+      ],
+      "priority": "Medium",
+      "createdAt": "2026-10-10T14:00:00Z"
+    },
+    {
+      "id": "US-DOC-001",
+      "role": "doctor",
+      "module": "Doctor Authentication",
+      "title": "Doctor Secure Credential Login",
+      "story": "As a medical doctor, I want to authenticate using my clinical username and password so that I can access my daily appointments and patient schedule.",
+      "acceptanceCriteria": [
+        "The Doctor Login page (/doctorlogin) shall accept username and password.",
+        "Entering valid credentials (e.g. username 'test', password 'test') shall return a signed JWT token.",
+        "The token shall be stored in localStorage and user redirected to Doctor Dashboard (/doctor).",
+        "Submitting incorrect credentials shall show 'wrong username or password' without revealing account existence."
+      ],
+      "priority": "Critical",
+      "createdAt": "2026-10-10T14:30:00Z"
+    },
+    {
+      "id": "US-DOC-002",
+      "role": "doctor",
+      "module": "Clinical Schedule",
+      "title": "Doctor Today's Consultation Schedule View",
+      "story": "As a doctor, I want to view a timeline of all patient appointments scheduled for today so that I can prepare for my consultations.",
+      "acceptanceCriteria": [
+        "The dashboard shall display Today's Schedule with Date, Time Slot, Patient Name, and Meet Link.",
+        "Consultations shall be ordered chronologically by slot time (09:00, 12:00, 15:00).",
+        "If no appointments are booked for today, a clear 'No appointments scheduled today' message shall appear.",
+        "Clicking 'Join Meet' shall open the respective patient's virtual meeting."
+      ],
+      "priority": "Critical",
+      "createdAt": "2026-10-10T15:00:00Z"
+    },
+    {
+      "id": "US-DOC-003",
+      "role": "doctor",
+      "module": "Doctor Profile",
+      "title": "Doctor Profile & Fee Management",
+      "story": "As a doctor, I want to inspect and update my personal details, phone number, medical specialty, and consultation fee per session so that patients see current information.",
+      "acceptanceCriteria": [
+        "The 'Personal Details' view shall display Doctor Name, Specialization, Phone Number, and Fees Per Session.",
+        "Updating fees or contact info shall persist to the database via /doctors/update.",
+        "Updated consultation fees shall immediately apply to future patient slot bookings."
+      ],
+      "priority": "Medium",
+      "createdAt": "2026-10-10T15:30:00Z"
+    },
+    {
+      "id": "US-DOC-004",
+      "role": "doctor",
+      "module": "Financial History",
+      "title": "Doctor Appointment History & Earnings Summary",
+      "story": "As a doctor, I want to review previous appointments and track total revenue earned from completed sessions so that I can manage my practice finances.",
+      "acceptanceCriteria": [
+        "The 'Previous Appointments' view shall list all completed patient sessions.",
+        "Each entry shall show consultation date, patient name, slot time, and feedback score.",
+        "The interface shall aggregate total earnings based on completed appointments and doctor session fee."
+      ],
+      "priority": "Medium",
+      "createdAt": "2026-10-10T16:00:00Z"
+    },
+    {
+      "id": "US-DOC-005",
+      "role": "doctor",
+      "module": "Patient Reviews",
+      "title": "Doctor Patient Feedback Inspection",
+      "story": "As a doctor, I want to inspect detailed patient reviews and star ratings for each past appointment so that I can improve my bedside manner and clinical service.",
+      "acceptanceCriteria": [
+        "The feedback column in Previous Appointments shall render star icons corresponding to the rating.",
+        "Clicking on feedback details shall navigate to /doctor/feedback/:id.",
+        "The page shall render the review title, detailed narrative, and patient identity."
+      ],
+      "priority": "Low",
+      "createdAt": "2026-10-10T16:30:00Z"
+    },
+    {
+      "id": "US-ADM-001",
+      "role": "admin",
+      "module": "Hospital Administration",
+      "title": "Admin Doctor Onboarding & Credential Verification",
+      "story": "As a hospital administrator, I want to register and verify new doctors in the hospital database so that only licensed medical professionals can accept appointments.",
+      "acceptanceCriteria": [
+        "The system shall accept doctor username, encrypted password, full name, phone, specialization, and session fee.",
+        "Upon creation via /doctors/add, initial appointment slot templates shall be initialized.",
+        "System shall enforce uniqueness of doctor username across the platform.",
+        "Newly registered doctors shall immediately appear in the patient doctor search directory."
+      ],
+      "priority": "High",
+      "createdAt": "2026-10-10T17:00:00Z"
+    },
+    {
+      "id": "US-SEC-001",
+      "role": "admin",
+      "module": "Security & RBAC",
+      "title": "Role-Based Access Control and Unauthorized Route Protection",
+      "story": "As a security administrator, I want unauthenticated or unauthorized users to be denied access to clinical portals (/doctor, /patient) so that sensitive medical records remain confidential.",
+      "acceptanceCriteria": [
+        "Navigating directly to /doctor without a valid doctor JWT shall redirect immediately to /doctorlogin.",
+        "A patient JWT token shall not grant access to doctor-only endpoints (/doctors/update, /doctor).",
+        "Tampered, expired, or malformed JWT tokens shall be rejected with 401 Unauthorized.",
+        "Logging out shall clear localStorage tokens and invalidate the client session."
+      ],
+      "priority": "Critical",
+      "createdAt": "2026-10-10T17:30:00Z"
+    }
+  ],
+  "testCases": [
+    {
+      "userStoryId": "US-PAT-004",
+      "userStoryTitle": "Doctor Consultation Date Selection",
+      "title": "Doctor Consultation Date Selection - Mid-Transaction Network Interruption & Rollback",
+      "description": "Verify that an abrupt client disconnect or network timeout during a state-modifying action releases reserved locks and restores previous state.",
+      "scenarioType": "edge_case",
+      "priority": "High",
+      "role": "patient",
+      "preconditions": [
+        "User starts multi-step consultation reservation flow"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Reserve temporary slot and proceed to confirmation dialog",
+          "testData": "Slot marked temporarily locked",
+          "expectedResult": "Slot unavailable to other clients during lock duration"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Simulate network timeout / browser tab closure before confirmation",
+          "testData": "Drop socket connection",
+          "expectedResult": "Confirmation handshake fails to complete within TTL window"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Check slot status after lock expiration (TTL)",
+          "testData": "Query slot availability",
+          "expectedResult": "Slot reverts to isBooked: false; no ghost appointment created"
+        }
+      ],
+      "expectedResult": "System avoids orphaned bookings and preserves schedule hygiene.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:20:34.619Z",
+      "id": "TP-TC-025",
+      "updatedAt": "2026-10-14T20:20:34.619Z"
+    },
+    {
+      "userStoryId": "US-PAT-004",
+      "userStoryTitle": "Doctor Consultation Date Selection",
+      "title": "Doctor Consultation Date Selection - Concurrent Execution & Race Condition Defense",
+      "description": "Verify that simultaneous operations (e.g. concurrent slot bookings or rapid multiple button clicks) maintain data consistency without duplicates.",
+      "scenarioType": "edge_case",
+      "priority": "Critical",
+      "role": "patient",
+      "preconditions": [
+        "Target healthcare resource is in a ready, open state",
+        "Two concurrent clients ready to dispatch simultaneous requests"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Dispatch Client A request for resource reservation",
+          "testData": "Timestamp T0: Request A sent",
+          "expectedResult": "Server accepts Request A and initiates transaction"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Dispatch Client B request for identical resource within 50ms window",
+          "testData": "Timestamp T0 + 20ms: Request B sent",
+          "expectedResult": "Database locking / atomic update evaluates conflict"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Evaluate server responses for both requests",
+          "testData": "HTTP response codes",
+          "expectedResult": "Exactly one request succeeds (HTTP 200); the competing request is cleanly rejected (HTTP 409 Conflict)"
+        }
+      ],
+      "expectedResult": "System guarantees isolation; zero double-booking or state duplication occurs.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:20:34.619Z",
+      "id": "TP-TC-023",
+      "updatedAt": "2026-10-14T20:20:34.619Z"
+    },
+    {
+      "userStoryId": "US-PAT-004",
+      "userStoryTitle": "Doctor Consultation Date Selection",
+      "title": "Doctor Consultation Date Selection - Cross-Role Route Access Prevention",
+      "description": "Verify that a patient user cannot directly access doctor clinical endpoints or modify doctor fee structures.",
+      "scenarioType": "negative",
+      "priority": "Critical",
+      "role": "patient",
+      "preconditions": [
+        "User is authenticated as a patient"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Attempt direct GET request to /doctor dashboard",
+          "testData": "http://localhost:3000/doctor",
+          "expectedResult": "Client route guard detects non-doctor identity"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Verify redirection or blocking screen",
+          "testData": "Location header or navigation",
+          "expectedResult": "User is redirected to /doctorlogin or presented with Access Denied modal"
+        }
+      ],
+      "expectedResult": "Role segregation is maintained in compliance with healthcare security requirements.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:20:34.619Z",
+      "id": "TP-TC-021",
+      "updatedAt": "2026-10-14T20:20:34.619Z"
+    },
+    {
+      "userStoryId": "US-PAT-004",
+      "userStoryTitle": "Doctor Consultation Date Selection",
+      "title": "Doctor Consultation Date Selection - Input Validation & Empty Field Handling",
+      "description": "Verify that attempting to execute the action with empty or malformed inputs is rejected gracefully with clear user guidance.",
+      "scenarioType": "negative",
+      "priority": "Medium",
+      "role": "patient",
+      "preconditions": [
+        "User is on the input form for Doctor Consultation Date Selection"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Leave mandatory fields blank or supply invalid character set",
+          "testData": "\"\" (empty string) / invalid formats",
+          "expectedResult": "Client-side validation triggers or server responds with HTTP 400 Bad Request"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Attempt to trigger submission",
+          "testData": "Click Submit button",
+          "expectedResult": "Form submission is blocked or server returns structured error response"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Verify UI notification and focus management",
+          "testData": "Alert banner / input outline",
+          "expectedResult": "Clear error prompt indicates missing parameter; no corrupted DB record created"
+        }
+      ],
+      "expectedResult": "System prevents bad data ingestion and assists user with corrective guidance.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:20:34.619Z",
+      "id": "TP-TC-019",
+      "updatedAt": "2026-10-14T20:20:34.619Z"
+    },
+    {
+      "userStoryId": "US-PAT-004",
+      "userStoryTitle": "Doctor Consultation Date Selection",
+      "title": "Doctor Consultation Date Selection - Standard Happy Path Execution",
+      "description": "Verify that a valid patient completes the expected flow described in \"As a patient, I want to browse an interactive calendar and pick a future consultation date so that I can schedule a visit at my convenience.\" with all acceptance criteria satisfied.",
+      "scenarioType": "positive",
+      "priority": "High",
+      "role": "patient",
+      "preconditions": [
+        "Healthcare platform backend (port 5000) and frontend (port 3000) are operational",
+        "PATIENT is authenticated with valid credentials and active session"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Navigate to target patient view",
+          "testData": "http://localhost:3000/patient",
+          "expectedResult": "Page renders expected patient dashboard header and interactive navigation controls"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Input standard valid test inputs fulfilling: The calendar shall visually disable and disallow selection of past dates.",
+          "testData": "Valid format conforming to healthcare data constraints",
+          "expectedResult": "Input fields validate without error highlighting or blocking tooltips"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Submit action via primary call-to-action button",
+          "testData": "User click event",
+          "expectedResult": "Client sends API request to backend; returns HTTP 200 with JSON payload"
+        },
+        {
+          "stepNumber": 4,
+          "action": "Verify immediate UI reflection and state persistence",
+          "testData": "DOM inspection",
+          "expectedResult": "System reflects state change; toast confirmation shown; database record saved"
+        }
+      ],
+      "expectedResult": "Flow completes successfully; audit record created; user remains in valid state.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:20:34.619Z",
+      "id": "TP-TC-017",
+      "updatedAt": "2026-10-14T20:20:34.619Z"
+    },
+    {
+      "userStoryId": "US-PAT-001",
+      "userStoryTitle": "Patient Registration and Profile Initialization",
+      "title": "Patient Registration and Profile Initialization - Mid-Transaction Network Interruption & Rollback",
+      "description": "Verify that an abrupt client disconnect or network timeout during a state-modifying action releases reserved locks and restores previous state.",
+      "scenarioType": "edge_case",
+      "priority": "High",
+      "role": "patient",
+      "preconditions": [
+        "User starts multi-step consultation reservation flow"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Reserve temporary slot and proceed to confirmation dialog",
+          "testData": "Slot marked temporarily locked",
+          "expectedResult": "Slot unavailable to other clients during lock duration"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Simulate network timeout / browser tab closure before confirmation",
+          "testData": "Drop socket connection",
+          "expectedResult": "Confirmation handshake fails to complete within TTL window"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Check slot status after lock expiration (TTL)",
+          "testData": "Query slot availability",
+          "expectedResult": "Slot reverts to isBooked: false; no ghost appointment created"
+        }
+      ],
+      "expectedResult": "System avoids orphaned bookings and preserves schedule hygiene.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:20:10.433Z",
+      "id": "TP-TC-020",
+      "updatedAt": "2026-10-14T20:20:10.433Z"
+    },
+    {
+      "userStoryId": "US-PAT-001",
+      "userStoryTitle": "Patient Registration and Profile Initialization",
+      "title": "Patient Registration and Profile Initialization - Concurrent Execution & Race Condition Defense",
+      "description": "Verify that simultaneous operations (e.g. concurrent slot bookings or rapid multiple button clicks) maintain data consistency without duplicates.",
+      "scenarioType": "edge_case",
+      "priority": "Critical",
+      "role": "patient",
+      "preconditions": [
+        "Target healthcare resource is in a ready, open state",
+        "Two concurrent clients ready to dispatch simultaneous requests"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Dispatch Client A request for resource reservation",
+          "testData": "Timestamp T0: Request A sent",
+          "expectedResult": "Server accepts Request A and initiates transaction"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Dispatch Client B request for identical resource within 50ms window",
+          "testData": "Timestamp T0 + 20ms: Request B sent",
+          "expectedResult": "Database locking / atomic update evaluates conflict"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Evaluate server responses for both requests",
+          "testData": "HTTP response codes",
+          "expectedResult": "Exactly one request succeeds (HTTP 200); the competing request is cleanly rejected (HTTP 409 Conflict)"
+        }
+      ],
+      "expectedResult": "System guarantees isolation; zero double-booking or state duplication occurs.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:20:10.433Z",
+      "id": "TP-TC-018",
+      "updatedAt": "2026-10-14T20:20:10.433Z"
+    },
+    {
+      "userStoryId": "US-PAT-001",
+      "userStoryTitle": "Patient Registration and Profile Initialization",
+      "title": "Patient Registration and Profile Initialization - Cross-Role Route Access Prevention",
+      "description": "Verify that a patient user cannot directly access doctor clinical endpoints or modify doctor fee structures.",
+      "scenarioType": "negative",
+      "priority": "Critical",
+      "role": "patient",
+      "preconditions": [
+        "User is authenticated as a patient"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Attempt direct GET request to /doctor dashboard",
+          "testData": "http://localhost:3000/doctor",
+          "expectedResult": "Client route guard detects non-doctor identity"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Verify redirection or blocking screen",
+          "testData": "Location header or navigation",
+          "expectedResult": "User is redirected to /doctorlogin or presented with Access Denied modal"
+        }
+      ],
+      "expectedResult": "Role segregation is maintained in compliance with healthcare security requirements.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:20:10.433Z",
+      "id": "TP-TC-016",
+      "updatedAt": "2026-10-14T20:20:10.433Z"
+    },
+    {
+      "userStoryId": "US-PAT-001",
+      "userStoryTitle": "Patient Registration and Profile Initialization",
+      "title": "Patient Registration and Profile Initialization - Input Validation & Empty Field Handling",
+      "description": "Verify that attempting to execute the action with empty or malformed inputs is rejected gracefully with clear user guidance.",
+      "scenarioType": "negative",
+      "priority": "Medium",
+      "role": "patient",
+      "preconditions": [
+        "User is on the input form for Patient Registration and Profile Initialization"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Leave mandatory fields blank or supply invalid character set",
+          "testData": "\"\" (empty string) / invalid formats",
+          "expectedResult": "Client-side validation triggers or server responds with HTTP 400 Bad Request"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Attempt to trigger submission",
+          "testData": "Click Submit button",
+          "expectedResult": "Form submission is blocked or server returns structured error response"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Verify UI notification and focus management",
+          "testData": "Alert banner / input outline",
+          "expectedResult": "Clear error prompt indicates missing parameter; no corrupted DB record created"
+        }
+      ],
+      "expectedResult": "System prevents bad data ingestion and assists user with corrective guidance.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:20:10.433Z",
+      "id": "TP-TC-014",
+      "updatedAt": "2026-10-14T20:20:10.433Z"
+    },
+    {
+      "userStoryId": "US-PAT-001",
+      "userStoryTitle": "Patient Registration and Profile Initialization",
+      "title": "Patient Registration and Profile Initialization - Standard Happy Path Execution",
+      "description": "Verify that a valid patient completes the expected flow described in \"As a new patient, I want to create an account with my basic personal information so that I can schedule medical consultations.\" with all acceptance criteria satisfied.",
+      "scenarioType": "positive",
+      "priority": "High",
+      "role": "patient",
+      "preconditions": [
+        "Healthcare platform backend (port 5000) and frontend (port 3000) are operational",
+        "PATIENT is authenticated with valid credentials and active session"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Navigate to target patient view",
+          "testData": "http://localhost:3000/patient",
+          "expectedResult": "Page renders expected patient dashboard header and interactive navigation controls"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Input standard valid test inputs fulfilling: The system shall accept patient name, contact email, and valid phone number.",
+          "testData": "Valid format conforming to healthcare data constraints",
+          "expectedResult": "Input fields validate without error highlighting or blocking tooltips"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Submit action via primary call-to-action button",
+          "testData": "User click event",
+          "expectedResult": "Client sends API request to backend; returns HTTP 200 with JSON payload"
+        },
+        {
+          "stepNumber": 4,
+          "action": "Verify immediate UI reflection and state persistence",
+          "testData": "DOM inspection",
+          "expectedResult": "System reflects state change; toast confirmation shown; database record saved"
+        }
+      ],
+      "expectedResult": "Flow completes successfully; audit record created; user remains in valid state.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:20:10.433Z",
+      "id": "TP-TC-012",
+      "updatedAt": "2026-10-14T20:20:10.433Z"
+    },
+    {
+      "userStoryId": "US-PAT-005",
+      "userStoryTitle": "Time Slot Selection & Collision Prevention",
+      "title": "Time Slot Selection & Collision Prevention - Mid-Transaction Network Interruption & Rollback",
+      "description": "Verify that an abrupt client disconnect or network timeout during a state-modifying action releases reserved locks and restores previous state.",
+      "scenarioType": "edge_case",
+      "priority": "High",
+      "role": "patient",
+      "preconditions": [
+        "User starts multi-step consultation reservation flow"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Reserve temporary slot and proceed to confirmation dialog",
+          "testData": "Slot marked temporarily locked",
+          "expectedResult": "Slot unavailable to other clients during lock duration"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Simulate network timeout / browser tab closure before confirmation",
+          "testData": "Drop socket connection",
+          "expectedResult": "Confirmation handshake fails to complete within TTL window"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Check slot status after lock expiration (TTL)",
+          "testData": "Query slot availability",
+          "expectedResult": "Slot reverts to isBooked: false; no ghost appointment created"
+        }
+      ],
+      "expectedResult": "System avoids orphaned bookings and preserves schedule hygiene.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:01:05.487Z",
+      "id": "TP-TC-015",
+      "updatedAt": "2026-10-14T20:01:05.487Z"
+    },
+    {
+      "userStoryId": "US-PAT-005",
+      "userStoryTitle": "Time Slot Selection & Collision Prevention",
+      "title": "Time Slot Selection & Collision Prevention - Concurrent Execution & Race Condition Defense",
+      "description": "Verify that simultaneous operations (e.g. concurrent slot bookings or rapid multiple button clicks) maintain data consistency without duplicates.",
+      "scenarioType": "edge_case",
+      "priority": "Critical",
+      "role": "patient",
+      "preconditions": [
+        "Target healthcare resource is in a ready, open state",
+        "Two concurrent clients ready to dispatch simultaneous requests"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Dispatch Client A request for resource reservation",
+          "testData": "Timestamp T0: Request A sent",
+          "expectedResult": "Server accepts Request A and initiates transaction"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Dispatch Client B request for identical resource within 50ms window",
+          "testData": "Timestamp T0 + 20ms: Request B sent",
+          "expectedResult": "Database locking / atomic update evaluates conflict"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Evaluate server responses for both requests",
+          "testData": "HTTP response codes",
+          "expectedResult": "Exactly one request succeeds (HTTP 200); the competing request is cleanly rejected (HTTP 409 Conflict)"
+        }
+      ],
+      "expectedResult": "System guarantees isolation; zero double-booking or state duplication occurs.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:01:05.487Z",
+      "id": "TP-TC-013",
+      "updatedAt": "2026-10-14T20:01:05.487Z"
+    },
+    {
+      "userStoryId": "US-PAT-005",
+      "userStoryTitle": "Time Slot Selection & Collision Prevention",
+      "title": "Time Slot Selection & Collision Prevention - Cross-Role Route Access Prevention",
+      "description": "Verify that a patient user cannot directly access doctor clinical endpoints or modify doctor fee structures.",
+      "scenarioType": "negative",
+      "priority": "Critical",
+      "role": "patient",
+      "preconditions": [
+        "User is authenticated as a patient"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Attempt direct GET request to /doctor dashboard",
+          "testData": "http://localhost:3000/doctor",
+          "expectedResult": "Client route guard detects non-doctor identity"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Verify redirection or blocking screen",
+          "testData": "Location header or navigation",
+          "expectedResult": "User is redirected to /doctorlogin or presented with Access Denied modal"
+        }
+      ],
+      "expectedResult": "Role segregation is maintained in compliance with healthcare security requirements.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:01:05.487Z",
+      "id": "TP-TC-011",
+      "updatedAt": "2026-10-14T20:01:05.487Z"
+    },
+    {
+      "userStoryId": "US-PAT-005",
+      "userStoryTitle": "Time Slot Selection & Collision Prevention",
+      "title": "Time Slot Selection & Collision Prevention - Input Validation & Empty Field Handling",
+      "description": "Verify that attempting to execute the action with empty or malformed inputs is rejected gracefully with clear user guidance.",
+      "scenarioType": "negative",
+      "priority": "Medium",
+      "role": "patient",
+      "preconditions": [
+        "User is on the input form for Time Slot Selection & Collision Prevention"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Leave mandatory fields blank or supply invalid character set",
+          "testData": "\"\" (empty string) / invalid formats",
+          "expectedResult": "Client-side validation triggers or server responds with HTTP 400 Bad Request"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Attempt to trigger submission",
+          "testData": "Click Submit button",
+          "expectedResult": "Form submission is blocked or server returns structured error response"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Verify UI notification and focus management",
+          "testData": "Alert banner / input outline",
+          "expectedResult": "Clear error prompt indicates missing parameter; no corrupted DB record created"
+        }
+      ],
+      "expectedResult": "System prevents bad data ingestion and assists user with corrective guidance.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:01:05.487Z",
+      "id": "TP-TC-009",
+      "updatedAt": "2026-10-14T20:01:05.487Z"
+    },
+    {
+      "userStoryId": "US-PAT-005",
+      "userStoryTitle": "Time Slot Selection & Collision Prevention",
+      "title": "Time Slot Selection & Collision Prevention - Standard Happy Path Execution",
+      "description": "Verify that a valid patient completes the expected flow described in \"As a patient, I want to view available consultation slots (09:00:00, 12:00:00, 15:00:00) for my selected doctor and date, and book an open slot so that I am assured consultation time.\" with all acceptance criteria satisfied.",
+      "scenarioType": "positive",
+      "priority": "High",
+      "role": "patient",
+      "preconditions": [
+        "Healthcare platform backend (port 5000) and frontend (port 3000) are operational",
+        "PATIENT is authenticated with valid credentials and active session"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Navigate to target patient view",
+          "testData": "http://localhost:3000/patient",
+          "expectedResult": "Page renders expected patient dashboard header and interactive navigation controls"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Input standard valid test inputs fulfilling: The system shall query the doctor's dateSchedule and display slot statuses in real time.",
+          "testData": "Valid format conforming to healthcare data constraints",
+          "expectedResult": "Input fields validate without error highlighting or blocking tooltips"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Submit action via primary call-to-action button",
+          "testData": "User click event",
+          "expectedResult": "Client sends API request to backend; returns HTTP 200 with JSON payload"
+        },
+        {
+          "stepNumber": 4,
+          "action": "Verify immediate UI reflection and state persistence",
+          "testData": "DOM inspection",
+          "expectedResult": "System reflects state change; toast confirmation shown; database record saved"
+        }
+      ],
+      "expectedResult": "Flow completes successfully; audit record created; user remains in valid state.",
+      "status": "pending_review",
+      "promptVersion": "Chain-of-Thought (CoT) Healthcare QA",
+      "generatedAt": "2026-10-14T20:01:05.487Z",
+      "id": "TP-TC-007",
+      "updatedAt": "2026-10-14T20:01:05.487Z"
+    },
+    {
+      "id": "TP-TC-001",
+      "userStoryId": "US-DOC-001",
+      "userStoryTitle": "Doctor Secure Credential Login",
+      "title": "Doctor Login with Valid Credentials (Happy Path)",
+      "description": "Verify that a registered doctor can log in successfully with valid username and password, receiving a signed JWT token and landing on the doctor dashboard.",
+      "scenarioType": "positive",
+      "priority": "Critical",
+      "role": "doctor",
+      "preconditions": [
+        "Healthcare backend is running on http://localhost:5000",
+        "Doctor account exists with username 'test' and password 'test'",
+        "Browser local storage has no preexisting doctor session"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Navigate to doctor login page",
+          "testData": "http://localhost:3000/doctorlogin",
+          "expectedResult": "Doctor login form with username and password fields is rendered"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Enter valid username into username input",
+          "testData": "test",
+          "expectedResult": "Username field contains 'test'"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Enter valid password into password input",
+          "testData": "test",
+          "expectedResult": "Password field contains 'test' (masked)"
+        },
+        {
+          "stepNumber": 4,
+          "action": "Click the 'Login' submit button",
+          "testData": "Click event",
+          "expectedResult": "POST request sent to /doctors/login; returns 200 with JWT token"
+        },
+        {
+          "stepNumber": 5,
+          "action": "Observe client navigation",
+          "testData": "URL transition",
+          "expectedResult": "User is redirected to /doctor dashboard with active session"
+        }
+      ],
+      "expectedResult": "Doctor is successfully authenticated, JWT token stored in localStorage, and Doctor Dashboard is displayed.",
+      "status": "approved",
+      "reviewNotes": "Verified against reference backend bcrypt hashing logic. Production ready.",
+      "flaggedGaps": [],
+      "promptVersion": "v3-CoT-Domain",
+      "generatedAt": "2026-10-11T09:00:00Z",
+      "updatedAt": "2026-10-11T09:15:00Z"
+    },
+    {
+      "id": "TP-TC-002",
+      "userStoryId": "US-DOC-001",
+      "userStoryTitle": "Doctor Secure Credential Login",
+      "title": "Doctor Login with Invalid Password (Negative Flow)",
+      "description": "Verify that entering an incorrect password for an existing doctor username is rejected without leaking sensitive internal details.",
+      "scenarioType": "negative",
+      "priority": "High",
+      "role": "doctor",
+      "preconditions": [
+        "Healthcare backend is running on http://localhost:5000",
+        "Doctor account exists with username 'test'"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Navigate to doctor login page",
+          "testData": "http://localhost:3000/doctorlogin",
+          "expectedResult": "Doctor login form is displayed"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Enter valid username",
+          "testData": "test",
+          "expectedResult": "Username input populated"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Enter wrong password",
+          "testData": "wrongPassword999",
+          "expectedResult": "Password input populated"
+        },
+        {
+          "stepNumber": 4,
+          "action": "Click 'Login' button",
+          "testData": "Click event",
+          "expectedResult": "POST /doctors/login returns message 'wrong username or password'"
+        },
+        {
+          "stepNumber": 5,
+          "action": "Observe UI feedback",
+          "testData": "UI Alert",
+          "expectedResult": "Error notification displayed; user remains on /doctorlogin; no token saved"
+        }
+      ],
+      "expectedResult": "Authentication is denied; user remains unauthenticated and protected routes remain inaccessible.",
+      "status": "approved",
+      "reviewNotes": "Essential negative test case for doctor credential protection.",
+      "flaggedGaps": [],
+      "promptVersion": "v3-CoT-Domain",
+      "generatedAt": "2026-10-11T09:05:00Z",
+      "updatedAt": "2026-10-11T09:16:00Z"
+    },
+    {
+      "id": "TP-TC-003",
+      "userStoryId": "US-PAT-003",
+      "userStoryTitle": "Search and Browse Doctors by Specialty",
+      "title": "Patient Doctor Search by Specialty with Auto-Complete",
+      "description": "Verify that entering a medical specialty filters doctor listings dynamically and reveals relevant physician cards with fees and contact details.",
+      "scenarioType": "positive",
+      "priority": "High",
+      "role": "patient",
+      "preconditions": [
+        "At least 2 doctors exist in database with specialties 'Cardiology' and 'Dermatology'",
+        "Patient is on search doctor page"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Navigate to search doctor page",
+          "testData": "http://localhost:3000/patient/searchdoctor",
+          "expectedResult": "Search input box is displayed"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Type specialty into search box",
+          "testData": "derma",
+          "expectedResult": "Dropdown or filtered list shows Dermatology doctors"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Select or search specialty",
+          "testData": "Dermatology",
+          "expectedResult": "Doctor card appears showing name, specialization, phone, and fee"
+        },
+        {
+          "stepNumber": 4,
+          "action": "Verify 'Book' button presence",
+          "testData": "Element inspection",
+          "expectedResult": "Active 'Book' button is present and clickable"
+        }
+      ],
+      "expectedResult": "Specialist doctors are filtered accurately and display full clinical consultation pricing.",
+      "status": "approved",
+      "reviewNotes": "Covers main discovery user flow.",
+      "flaggedGaps": [],
+      "promptVersion": "v2-FewShot",
+      "generatedAt": "2026-10-11T10:00:00Z",
+      "updatedAt": "2026-10-11T10:10:00Z"
+    },
+    {
+      "id": "TP-TC-004",
+      "userStoryId": "US-PAT-005",
+      "userStoryTitle": "Time Slot Selection & Collision Prevention",
+      "title": "Prevent Double Booking of Already Reserved Slot (Edge Case)",
+      "description": "Verify that when a time slot (e.g. 09:00:00) is booked by Patient A, Patient B attempting to reserve the identical slot is prevented and warned of slot unavailability.",
+      "scenarioType": "edge_case",
+      "priority": "Critical",
+      "role": "patient",
+      "preconditions": [
+        "Doctor has a schedule for date '2026-10-20'",
+        "Slot 09:00:00 has isBooked set to true"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Query available slots for doctor on date",
+          "testData": "{ doctorId: 'doc123', date: '2026-10-20' }",
+          "expectedResult": "API returns slot list including 09:00:00 marked isBooked: true"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Attempt POST to /doctors/book-slot for 09:00:00",
+          "testData": "{ slotId: 'slot-0900', isBooked: true }",
+          "expectedResult": "System prevents booking or flags collision"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Observe UI slot button",
+          "testData": "DOM state",
+          "expectedResult": "Button for 09:00:00 is disabled or displays 'Booked'"
+        }
+      ],
+      "expectedResult": "System enforces concurrency safety and prevents double-booking of doctor slots.",
+      "status": "approved",
+      "reviewNotes": "Critical clinical concurrency edge case flagged by CoT Prompt Iteration 4.",
+      "flaggedGaps": [],
+      "promptVersion": "v4-CoT-Edge",
+      "generatedAt": "2026-10-11T11:00:00Z",
+      "updatedAt": "2026-10-11T11:15:00Z"
+    },
+    {
+      "id": "TP-TC-005",
+      "userStoryId": "US-SEC-001",
+      "userStoryTitle": "Role-Based Access Control and Unauthorized Route Protection",
+      "title": "Unauthenticated Direct Access to Doctor Dashboard is Blocked",
+      "description": "Verify that an unauthenticated user attempting to directly navigate to /doctor via address bar is blocked and redirected to /doctorlogin.",
+      "scenarioType": "negative",
+      "priority": "Critical",
+      "role": "admin",
+      "preconditions": [
+        "Browser localStorage has no token or invalid token"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Clear localStorage tokens",
+          "testData": "localStorage.clear()",
+          "expectedResult": "Storage is empty"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Directly navigate to /doctor",
+          "testData": "http://localhost:3000/doctor",
+          "expectedResult": "Client auth guard checks token; token missing"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Verify final URL location",
+          "testData": "window.location.pathname",
+          "expectedResult": "User is redirected to /doctorlogin or shows Access Denied"
+        }
+      ],
+      "expectedResult": "Unauthorized visitor cannot view doctor clinical schedules without valid credentials.",
+      "status": "approved",
+      "reviewNotes": "Security boundary test case validated.",
+      "flaggedGaps": [],
+      "promptVersion": "v3-CoT-Domain",
+      "generatedAt": "2026-10-11T11:30:00Z",
+      "updatedAt": "2026-10-11T11:45:00Z"
+    },
+    {
+      "id": "TP-TC-006",
+      "userStoryId": "US-PAT-009",
+      "userStoryTitle": "Patient Feedback & Star Rating Submission",
+      "title": "Submit 5-Star Rating and Feedback for Concluded Appointment",
+      "description": "Verify that a patient can rate their doctor and enter text feedback on a completed appointment, which persists into the appointment feedback document.",
+      "scenarioType": "positive",
+      "priority": "Medium",
+      "role": "patient",
+      "preconditions": [
+        "An appointment exists with appointmentId 'app-7788' and feedback.given is false"
+      ],
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Open feedback page for appointment",
+          "testData": "/patient/feedback/app-7788",
+          "expectedResult": "Feedback form loads with 5-star selector, title, and review box"
+        },
+        {
+          "stepNumber": 2,
+          "action": "Select 5 stars rating",
+          "testData": "5",
+          "expectedResult": "All 5 stars highlighted"
+        },
+        {
+          "stepNumber": 3,
+          "action": "Enter feedback title",
+          "testData": "Excellent bedside care and prompt diagnosis",
+          "expectedResult": "Title field populated"
+        },
+        {
+          "stepNumber": 4,
+          "action": "Enter feedback review narrative",
+          "testData": "Dr. Sharma explained everything clearly. Very satisfied.",
+          "expectedResult": "Review field populated"
+        },
+        {
+          "stepNumber": 5,
+          "action": "Click Submit Feedback button",
+          "testData": "Click submit",
+          "expectedResult": "PUT to /appointments/feedback returns 200 'Feedback updated successfully!'"
+        }
+      ],
+      "expectedResult": "Feedback is persisted with 5 stars and feedback.given marked true.",
+      "status": "approved",
+      "reviewNotes": "Validates clinical feedback cycle.",
+      "flaggedGaps": [],
+      "promptVersion": "v3-CoT-Domain",
+      "generatedAt": "2026-10-11T12:00:00Z",
+      "updatedAt": "2026-10-11T12:15:00Z"
+    }
+  ],
+  "promptExperiments": [
+    {
+      "id": "PE-EXP-001",
+      "iterationNumber": 1,
+      "targetStoryId": "US-PAT-005",
+      "targetStoryTitle": "Patient books an appointment with a doctor",
+      "role": "patient",
+      "promptStrategy": "Zero-Shot Naive Baseline",
+      "model": "gpt-4o-mini",
+      "temperature": 0.7,
+      "systemPrompt": "You are a test case generator. Write test cases for the user story provided.",
+      "userPrompt": "Generate test cases for: As a patient, I want to book an appointment with a doctor so that I can receive a consultation.",
+      "rawResponse": "Test Case 1: Book Appointment\nStep 1: Open website\nStep 2: Click book appointment\nStep 3: Select doctor\nStep 4: Click confirm\nExpected: Appointment is booked.\n\nTest Case 2: Cancel Appointment\nStep 1: Click cancel\nExpected: Appointment cancelled.",
+      "parsedTestCasesCount": 2,
+      "ratings": {
+        "completeness": 2,
+        "accuracy": 2,
+        "healthcareRelevance": 2,
+        "overallScore": 2
+      },
+      "whatChanged": "Baseline prompt with zero domain instructions, no persona, and unstructured prompt text.",
+      "whyItChanged": "Initial baseline to measure what off-the-shelf LLMs produce without prompt engineering. It produced only 2 vague tests, had no preconditions, omitted negative scenarios, and completely missed healthcare domain realities (time slots, doctor schedules, booking collisions).",
+      "keyFindings": "Naive zero-shot prompting leads to severe under-specification and QA hallucinations (assuming arbitrary one-click booking without slot checks).",
+      "createdAt": "2026-10-11T13:00:00Z"
+    },
+    {
+      "id": "PE-EXP-002",
+      "iterationNumber": 2,
+      "targetStoryId": "US-PAT-005",
+      "targetStoryTitle": "Patient books an appointment with a doctor",
+      "role": "patient",
+      "promptStrategy": "Role & Persona Grounded",
+      "model": "gpt-4o-mini",
+      "temperature": 0.5,
+      "systemPrompt": "You are a Senior Healthcare QA Engineer specializing in hospital management software, EHR systems, and HIPAA compliance.",
+      "userPrompt": "As a patient, I want to book an appointment with a doctor so that I can receive a consultation. Generate positive and negative test cases including preconditions and step-by-step actions.",
+      "rawResponse": "TC-01: Successful Appointment Booking (Positive)\nPreconditions: Patient is logged in, doctor has available schedule.\nSteps: 1. Go to search doctor; 2. Choose doctor; 3. Pick date; 4. Pick time slot; 5. Pay fee.\nExpected: Appointment confirmed.\n\nTC-02: Booking when no slots are free (Negative)\nPreconditions: Doctor schedule has all slots booked.\nSteps: 1. Select doctor; 2. Select date.\nExpected: Error shown that doctor is unavailable.",
+      "parsedTestCasesCount": 3,
+      "ratings": {
+        "completeness": 3,
+        "accuracy": 3,
+        "healthcareRelevance": 3,
+        "overallScore": 3
+      },
+      "whatChanged": "Added QA persona ('Senior Healthcare QA Engineer') and requested explicit positive and negative test cases with preconditions.",
+      "whyItChanged": "Addressing lack of test categorization and missing preconditions from Iteration 1. The persona immediately elicited negative testing (no slots free) and recognized doctor schedule availability.",
+      "keyFindings": "Role grounding significantly improves test mindset, but output format remains non-standardized and lacks boundary edge cases.",
+      "createdAt": "2026-10-11T13:30:00Z"
+    },
+    {
+      "id": "PE-EXP-003",
+      "iterationNumber": 3,
+      "targetStoryId": "US-PAT-005",
+      "targetStoryTitle": "Patient books an appointment with a doctor",
+      "role": "patient",
+      "promptStrategy": "Few-Shot Schema Grounded",
+      "model": "gpt-4o-mini",
+      "temperature": 0.3,
+      "systemPrompt": "You are an automated test designer. Return ONLY a valid JSON array of test cases conforming exactly to the provided schema.",
+      "userPrompt": "User Story: US-PAT-005 Patient books appointment. Given the reference JSON schema with testId, title, scenarioType, preconditions, and steps array, generate 4 test cases.",
+      "rawResponse": "[\n  { \"id\": \"TC-PAT-01\", \"scenarioType\": \"positive\", \"title\": \"Book Available 09:00 Slot\", \"preconditions\": [\"Doctor has free slots\"], \"steps\": [{\"stepNumber\": 1, \"action\": \"Select 09:00\", \"testData\": \"09:00:00\", \"expectedResult\": \"Slot selected\"}], \"expectedResult\": \"Booking confirmed\" },\n  { \"id\": \"TC-PAT-02\", \"scenarioType\": \"negative\", \"title\": \"Attempt to Book Without Date Selection\", \"preconditions\": [\"Patient on booking page\"], \"steps\": [{\"stepNumber\": 1, \"action\": \"Click Next Step without date\", \"testData\": \"null\", \"expectedResult\": \"Validation error displayed\"}], \"expectedResult\": \"Navigation blocked\" }\n]",
+      "parsedTestCasesCount": 4,
+      "ratings": {
+        "completeness": 4,
+        "accuracy": 4,
+        "healthcareRelevance": 4,
+        "overallScore": 4
+      },
+      "whatChanged": "Introduced strict JSON schema specification and two few-shot examples demonstrating step arrays with testData and expectedResult.",
+      "whyItChanged": "Unstructured plain text cannot be directly executed by automation runners like Playwright. Few-shot formatting forced machine-parseable JSON with 100% syntactic conformity.",
+      "keyFindings": "Few-shot examples with strict JSON output eliminate parsing errors and guarantee deterministic step schema.",
+      "createdAt": "2026-10-11T14:00:00Z"
+    },
+    {
+      "id": "PE-EXP-004",
+      "iterationNumber": 4,
+      "targetStoryId": "US-PAT-005",
+      "targetStoryTitle": "Patient books an appointment with a doctor",
+      "role": "patient",
+      "promptStrategy": "Chain-of-Thought (CoT) Clinical Concurrency Specialist",
+      "model": "gpt-4o",
+      "temperature": 0.2,
+      "systemPrompt": "You are a Principal Healthcare Software Test Architect. Before outputting test cases, perform step-by-step reasoning on: 1) Medical safety risks; 2) Concurrent race conditions (e.g. two patients booking 09:00:00 simultaneously); 3) Payment session drop-offs; 4) Timezone and past date constraints. Then output structured JSON test cases covering Positive, Negative, and Edge Cases.",
+      "userPrompt": "Generate a comprehensive test suite for US-PAT-005 (Time Slot Selection & Collision Prevention) targeting our MERN healthcare application.",
+      "rawResponse": "THINKING REASONING:\n1. Medical safety: An unconfirmed appointment could lead to missed medical care.\n2. Concurrency: Two patients viewing 09:00:00 simultaneously can trigger double booking unless atomic updates lock the slot.\n3. Edge cases: Past dates, leap days, network timeouts during Stripe payment.\nTEST CASES:\nGenerated 6 test cases: Happy path booking, Concurrent double booking rejection, Past date restriction, Payment timeout slot release, Autocomplete specialty miss, and Slot status persistence.",
+      "parsedTestCasesCount": 6,
+      "ratings": {
+        "completeness": 5,
+        "accuracy": 5,
+        "healthcareRelevance": 5,
+        "overallScore": 5
+      },
+      "whatChanged": "Integrated Chain-of-Thought (CoT) reasoning phase explicitly asking the LLM to analyze concurrency collisions and clinical edge cases before generating tests.",
+      "whyItChanged": "Addressing subtle healthcare bugs where two patients book the same doctor slot at 09:00:00. CoT compelled the model to generate concurrency edge-case tests with atomic locking assertions.",
+      "keyFindings": "Chain-of-Thought prompting drastically increases edge-case discovery (from 0 edge cases in Iteration 1 to 3 deep concurrency edge cases in Iteration 4).",
+      "createdAt": "2026-10-11T14:30:00Z"
+    },
+    {
+      "id": "PE-EXP-005",
+      "iterationNumber": 5,
+      "targetStoryId": "US-DOC-001",
+      "targetStoryTitle": "Doctor logs in and manages schedule",
+      "role": "doctor",
+      "promptStrategy": "Zero-Shot Naive Baseline (Doctor Role)",
+      "model": "gpt-4o-mini",
+      "temperature": 0.7,
+      "systemPrompt": "Generate test cases for doctor login and schedule management.",
+      "userPrompt": "As a doctor I want to log in and see today's schedule.",
+      "rawResponse": "Test 1: Doctor Login\nEnter name and password, see calendar.\n\nTest 2: Drag and drop appointment to reschedule\nClick appointment and drag to 2pm.",
+      "parsedTestCasesCount": 2,
+      "ratings": {
+        "completeness": 2,
+        "accuracy": 2,
+        "healthcareRelevance": 2,
+        "overallScore": 2
+      },
+      "whatChanged": "Naive zero-shot prompt applied to Doctor user story.",
+      "whyItChanged": "Evaluating model hallucination tendencies on doctor workflows. The model hallucinated a drag-and-drop calendar rescheduling feature that does not exist in the reference codebase.",
+      "keyFindings": "Without architectural grounding, LLMs readily invent non-existent features (e.g. interactive drag-and-drop). Grounding prompt in actual routes and DB models is required.",
+      "createdAt": "2026-10-11T15:00:00Z"
+    },
+    {
+      "id": "PE-EXP-006",
+      "iterationNumber": 6,
+      "targetStoryId": "US-DOC-001",
+      "targetStoryTitle": "Doctor logs in and manages schedule",
+      "role": "doctor",
+      "promptStrategy": "Codebase & Route Grounded Context",
+      "model": "gpt-4o-mini",
+      "temperature": 0.3,
+      "systemPrompt": "You are a QA automation engineer testing a React + Express hospital app. System routes: POST /doctors/login, GET /doctor, GET /doctor/perosnaldetails, GET /doctors/get-slots. Database uses fixed slots: 09:00:00, 12:00:00, 15:00:00.",
+      "userPrompt": "Generate structured tests for doctor login and schedule review conforming to the known routes and slot times.",
+      "rawResponse": "TC-DOC-01: Valid Doctor Login (username: 'test', password: 'test') -> returns JWT and navigates to /doctor\nTC-DOC-02: Invalid Doctor Password -> returns 201 message 'wrong username or password'\nTC-DOC-03: View Today's Schedule -> fetches slots (09:00, 12:00, 15:00) and displays patient names and meet links",
+      "parsedTestCasesCount": 4,
+      "ratings": {
+        "completeness": 4,
+        "accuracy": 4,
+        "healthcareRelevance": 4,
+        "overallScore": 4
+      },
+      "whatChanged": "Provided exact system context: Express endpoints, fixed slot timings (09:00:00, 12:00:00, 15:00:00), and JWT response format.",
+      "whyItChanged": "Eliminated the hallucinated drag-and-drop calendar from Iteration 5. Grounding the prompt in the exact codebase yielded tests that directly mirror real backend behavior.",
+      "keyFindings": "API and schema grounding drops hallucination rate to near 0% while matching actual application endpoints.",
+      "createdAt": "2026-10-11T15:30:00Z"
+    },
+    {
+      "id": "PE-EXP-007",
+      "iterationNumber": 7,
+      "targetStoryId": "US-DOC-002",
+      "targetStoryTitle": "Doctor logs in and manages schedule",
+      "role": "doctor",
+      "promptStrategy": "CoT Edge Case & Defensive State Enforcement",
+      "model": "gpt-4o",
+      "temperature": 0.2,
+      "systemPrompt": "You are a Principal Test Automation Architect. Analyze doctor schedule edge cases: 1) Doctor with zero appointments booked for today; 2) Doctor session expired while on schedule view; 3) Meet link generation failure. Generate comprehensive JSON test cases.",
+      "userPrompt": "Generate test suite covering US-DOC-002 (Today's Consultation Schedule) with full positive, negative, and edge-case coverage.",
+      "rawResponse": "Generated 5 test cases including: Empty schedule state graceful fallback, active meet link launch with noopener noreferrer, token expiry auto-logout, and multi-slot sequential order verification.",
+      "parsedTestCasesCount": 5,
+      "ratings": {
+        "completeness": 5,
+        "accuracy": 5,
+        "healthcareRelevance": 5,
+        "overallScore": 5
+      },
+      "whatChanged": "Instructed the LLM to focus on empty clinical rosters, token expiration mid-shift, and telehealth link rendering.",
+      "whyItChanged": "Doctors frequently encounter days with zero bookings or prolonged shifts where tokens expire. Defensive UI testing is critical in medical environments.",
+      "keyFindings": "Prompting specifically for empty states and session timeouts catches defensive programming bugs that standard happy-path tests miss.",
+      "createdAt": "2026-10-11T16:00:00Z"
+    },
+    {
+      "id": "PE-EXP-008",
+      "iterationNumber": 8,
+      "targetStoryId": "US-SEC-001",
+      "targetStoryTitle": "Unauthorised user attempts to access a restricted page",
+      "role": "admin",
+      "promptStrategy": "Zero-Shot Security Baseline",
+      "model": "gpt-4o-mini",
+      "temperature": 0.7,
+      "systemPrompt": "Generate security tests for a web application.",
+      "userPrompt": "Write security tests for unauthorized user accessing restricted pages in a hospital app.",
+      "rawResponse": "Test 1: SQL Injection in search bar\nTest 2: XSS in feedback box\nTest 3: DDoS attack on server",
+      "parsedTestCasesCount": 3,
+      "ratings": {
+        "completeness": 2,
+        "accuracy": 3,
+        "healthcareRelevance": 2,
+        "overallScore": 2.3
+      },
+      "whatChanged": "Generic security prompt without role or route definitions.",
+      "whyItChanged": "Testing baseline security test generation. The model defaulted to textbook web exploits (SQLi, XSS, DDoS) and completely ignored role-based authorization boundaries (Patient vs Doctor).",
+      "keyFindings": "Without RBAC context, generic security prompts miss medical authorization bypass and cross-role privilege escalation.",
+      "createdAt": "2026-10-11T16:30:00Z"
+    },
+    {
+      "id": "PE-EXP-009",
+      "iterationNumber": 9,
+      "targetStoryId": "US-SEC-001",
+      "targetStoryTitle": "Unauthorised user attempts to access a restricted page",
+      "role": "admin",
+      "promptStrategy": "Healthcare RBAC Matrix-Guided Prompt",
+      "model": "gpt-4o-mini",
+      "temperature": 0.3,
+      "systemPrompt": "You are a Healthcare Cybersecurity & QA Compliance Auditor. Role access rules: Unauthenticated users: ONLY '/' and '/doctorlogin'. Patients: '/patient/*', NEVER '/doctor/*'. Doctors: '/doctor/*', NEVER patient booking as patient. Return structured JSON test cases.",
+      "userPrompt": "Generate RBAC authorization test cases verifying that privilege boundaries are strictly enforced across all routes.",
+      "rawResponse": "TC-SEC-01: Direct navigation to /doctor without token redirects to /doctorlogin\nTC-SEC-02: Patient JWT presented to doctor update endpoint returns 401/403\nTC-SEC-03: Logout cleanses localStorage and blocks back-button navigation",
+      "parsedTestCasesCount": 4,
+      "ratings": {
+        "completeness": 4,
+        "accuracy": 4,
+        "healthcareRelevance": 4,
+        "overallScore": 4
+      },
+      "whatChanged": "Provided explicit Role-Based Access Control (RBAC) matrix defining allowed and disallowed routes per role.",
+      "whyItChanged": "Replaced generic OWASP tests with healthcare-specific authorization tests to protect confidential patient and doctor data.",
+      "keyFindings": "Matrix-guided prompt structures prevent permission leakage and produce test cases that directly assert on HTTP 401/403 and client redirects.",
+      "createdAt": "2026-10-11T17:00:00Z"
+    },
+    {
+      "id": "PE-EXP-010",
+      "iterationNumber": 10,
+      "targetStoryId": "US-SEC-001",
+      "targetStoryTitle": "Unauthorised user attempts to access a restricted page",
+      "role": "admin",
+      "promptStrategy": "Adversarial Token Tampering & Session Hijacking CoT",
+      "model": "gpt-4o",
+      "temperature": 0.2,
+      "systemPrompt": "You are a Principal Security Test Architect for HIPAA-regulated platforms. Reason step-by-step through: 1) Malformed JWT signature injection; 2) LocalStorage token tampering (changing role payload); 3) Concurrent multi-tab session expiration; 4) CSRF and CORS origin spoofing. Generate executable test cases with exact assertions.",
+      "userPrompt": "Generate advanced security test suite for US-SEC-001 covering adversarial access attempts against the healthcare backend and frontend.",
+      "rawResponse": "Generated 6 test cases:\n1. Malformed JWT signature rejection on /doctors/update\n2. Tampered payload doctor ID spoofing\n3. Unauthenticated direct URL navigation guard\n4. Patient token cross-role invocation block\n5. LocalStorage clearing on logout\n6. Expired token automated session revoking",
+      "parsedTestCasesCount": 6,
+      "ratings": {
+        "completeness": 5,
+        "accuracy": 5,
+        "healthcareRelevance": 5,
+        "overallScore": 5
+      },
+      "whatChanged": "Combined adversarial security scenarios (signature tampering, ID spoofing, cross-role token replay) with CoT reasoning and concrete status assertions.",
+      "whyItChanged": "Ensuring compliance with healthcare data protection standards (HIPAA security rule). High-level prompts miss cryptographic and token manipulation vectors.",
+      "keyFindings": "Adversarial CoT prompting produces enterprise-grade penetration and authorization test suites capable of uncovering cryptographic and state vulnerabilities.",
+      "createdAt": "2026-10-11T17:30:00Z"
+    },
+    {
+      "targetStoryId": "US-PAT-005",
+      "targetStoryTitle": "Time Slot Selection & Collision Prevention",
+      "role": "patient",
+      "promptStrategy": "Chain-of-Thought (CoT) Healthcare QA",
+      "model": "builtin-healthcare-engine",
+      "temperature": 0.3,
+      "systemPrompt": "You are a Principal Healthcare Software Test Architect with deep expertise in HIPAA compliance, EHR workflows, and hospital appointment concurrency.\nBefore outputting test cases, reason step-by-step through:\n1. Clinical & Patient Safety: What happens if consultation timing or patient details are mishandled?\n2. Doctor Availability: How do 09:00, 12:00, 15:00 slot intervals behave?\n3. State Transitions & Concurrency: Can two patients race for the same slot?\n4. Negative Scenarios: Invalid credentials, missing headers, network drops during payment.\n5. Edge Cases: Past dates, leap years, empty rosters, boundary fee inputs.\n\nReturn ONLY a valid JSON array of test cases covering positive, negative, and edge-case scenarios.",
+      "userPrompt": "User Story: As a patient, I want to view available consultation slots (09:00:00, 12:00:00, 15:00:00) for my selected doctor and date, and book an open slot so that I am assured consultation time.\nRole: patient\nModule: Appointment Booking\nAcceptance Criteria:\n1. The system shall query the doctor's dateSchedule and display slot statuses in real time.\n2. Available slots shall display an active 'Book Slot' button.\n3. Already booked slots (isBooked = true) shall be disabled or clearly marked as unavailable.\n4. Selecting an open slot shall temporarily reserve it and proceed to the Payment stage.\n\nPerform clinical CoT analysis and generate 5 to 6 comprehensive, production-grade test cases.",
+      "rawResponse": "[\n  {\n    \"title\": \"Time Slot Selection & Collision Prevention - Standard Happy Path Execution\",\n    \"description\": \"Verify that a valid patient completes the expected flow described in \\\"As a patient, I want to view available consultation slots (09:00:00, 12:00:00, 15:00:00) for my selected doctor and date, and book an open slot so that I am assured consultation time.\\\" with all acceptance criteria satisfied.\",\n    \"scenarioType\": \"positive\",\n    \"priority\": \"High\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"Healthcare platform backend (port 5000) and frontend (port 3000) are operational\",\n      \"PATIENT is authenticated with valid credentials and active session\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Navigate to target patient view\",\n        \"testData\": \"http://localhost:3000/patient\",\n        \"expectedResult\": \"Page renders expected patient dashboard header and interactive navigation controls\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Input standard valid test inputs fulfilling: The system shall query the doctor's dateSchedule and display slot statuses in real time.\",\n        \"testData\": \"Valid format conforming to healthcare data constraints\",\n        \"expectedResult\": \"Input fields validate without error highlighting or blocking tooltips\"\n      },\n      {\n        \"stepNumber\": 3,\n        \"action\": \"Submit action via primary call-to-action button\",\n        \"testData\": \"User click event\",\n        \"expectedResult\": \"Client sends API request to backend; returns HTTP 200 with JSON payload\"\n      },\n      {\n        \"stepNumber\": 4,\n        \"action\": \"Verify immediate UI reflection and state persistence\",\n        \"testData\": \"DOM inspection\",\n        \"expectedResult\": \"System reflects state change; toast confirmation shown; database record saved\"\n      }\n    ],\n    \"expectedResult\": \"Flow completes successfully; audit record created; user remains in valid state.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  },\n  {\n    \"title\": \"Time Slot Selection & Collision Prevention - Input Validation & Empty Field Handling\",\n    \"description\": \"Verify that attempting to execute the action with empty or malformed inputs is rejected gracefully with clear user guidance.\",\n    \"scenarioType\": \"negative\",\n    \"priority\": \"Medium\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"User is on the input form for Time Slot Selection & Collision Prevention\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Leave mandatory fields blank or supply invalid character set\",\n        \"testData\": \"\\\"\\\" (empty string) / invalid formats\",\n        \"expectedResult\": \"Client-side validation triggers or server responds with HTTP 400 Bad Request\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Attempt to trigger submission\",\n        \"testData\": \"Click Submit button\",\n        \"expectedResult\": \"Form submission is blocked or server returns structured error response\"\n      },\n      {\n        \"stepNumber\": 3,\n        \"action\": \"Verify UI notification and focus management\",\n        \"testData\": \"Alert banner / input outline\",\n        \"expectedResult\": \"Clear error prompt indicates missing parameter; no corrupted DB record created\"\n      }\n    ],\n    \"expectedResult\": \"System prevents bad data ingestion and assists user with corrective guidance.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  },\n  {\n    \"title\": \"Time Slot Selection & Collision Prevention - Cross-Role Route Access Prevention\",\n    \"description\": \"Verify that a patient user cannot directly access doctor clinical endpoints or modify doctor fee structures.\",\n    \"scenarioType\": \"negative\",\n    \"priority\": \"Critical\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"User is authenticated as a patient\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Attempt direct GET request to /doctor dashboard\",\n        \"testData\": \"http://localhost:3000/doctor\",\n        \"expectedResult\": \"Client route guard detects non-doctor identity\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Verify redirection or blocking screen\",\n        \"testData\": \"Location header or navigation\",\n        \"expectedResult\": \"User is redirected to /doctorlogin or presented with Access Denied modal\"\n      }\n    ],\n    \"expectedResult\": \"Role segregation is maintained in compliance with healthcare security requirements.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  },\n  {\n    \"title\": \"Time Slot Selection & Collision Prevention - Concurrent Execution & Race Condition Defense\",\n    \"description\": \"Verify that simultaneous operations (e.g. concurrent slot bookings or rapid multiple button clicks) maintain data consistency without duplicates.\",\n    \"scenarioType\": \"edge_case\",\n    \"priority\": \"Critical\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"Target healthcare resource is in a ready, open state\",\n      \"Two concurrent clients ready to dispatch simultaneous requests\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Dispatch Client A request for resource reservation\",\n        \"testData\": \"Timestamp T0: Request A sent\",\n        \"expectedResult\": \"Server accepts Request A and initiates transaction\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Dispatch Client B request for identical resource within 50ms window\",\n        \"testData\": \"Timestamp T0 + 20ms: Request B sent\",\n        \"expectedResult\": \"Database locking / atomic update evaluates conflict\"\n      },\n      {\n        \"stepNumber\": 3,\n        \"action\": \"Evaluate server responses for both requests\",\n        \"testData\": \"HTTP response codes\",\n        \"expectedResult\": \"Exactly one request succeeds (HTTP 200); the competing request is cleanly rejected (HTTP 409 Conflict)\"\n      }\n    ],\n    \"expectedResult\": \"System guarantees isolation; zero double-booking or state duplication occurs.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  },\n  {\n    \"title\": \"Time Slot Selection & Collision Prevention - Mid-Transaction Network Interruption & Rollback\",\n    \"description\": \"Verify that an abrupt client disconnect or network timeout during a state-modifying action releases reserved locks and restores previous state.\",\n    \"scenarioType\": \"edge_case\",\n    \"priority\": \"High\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"User starts multi-step consultation reservation flow\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Reserve temporary slot and proceed to confirmation dialog\",\n        \"testData\": \"Slot marked temporarily locked\",\n        \"expectedResult\": \"Slot unavailable to other clients during lock duration\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Simulate network timeout / browser tab closure before confirmation\",\n        \"testData\": \"Drop socket connection\",\n        \"expectedResult\": \"Confirmation handshake fails to complete within TTL window\"\n      },\n      {\n        \"stepNumber\": 3,\n        \"action\": \"Check slot status after lock expiration (TTL)\",\n        \"testData\": \"Query slot availability\",\n        \"expectedResult\": \"Slot reverts to isBooked: false; no ghost appointment created\"\n      }\n    ],\n    \"expectedResult\": \"System avoids orphaned bookings and preserves schedule hygiene.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  }\n]",
+      "parsedTestCasesCount": 5,
+      "ratings": {
+        "completeness": 5,
+        "accuracy": 5,
+        "healthcareRelevance": 5,
+        "overallScore": 5
+      },
+      "whatChanged": "Applied prompt strategy 'Chain-of-Thought (CoT) Healthcare QA' with temperature 0.3. Evaluated across 5 generated test cases.",
+      "whyItChanged": "Strategy 'Chain-of-Thought (CoT) Healthcare QA' optimizes prompt framing to enforce structured positive, negative, and domain edge cases.",
+      "keyFindings": "Generated 5 test cases with rating 5/5 using Chain-of-Thought (CoT) Healthcare QA.",
+      "id": "PE-EXP-011",
+      "iterationNumber": 11,
+      "createdAt": "2026-10-14T20:01:05.490Z"
+    },
+    {
+      "targetStoryId": "US-PAT-001",
+      "targetStoryTitle": "Patient Registration and Profile Initialization",
+      "role": "patient",
+      "promptStrategy": "Chain-of-Thought (CoT) Healthcare QA",
+      "model": "builtin-healthcare-engine",
+      "temperature": 0.3,
+      "systemPrompt": "You are a Principal Healthcare Software Test Architect with deep expertise in HIPAA compliance, EHR workflows, and hospital appointment concurrency.\nBefore outputting test cases, reason step-by-step through:\n1. Clinical & Patient Safety: What happens if consultation timing or patient details are mishandled?\n2. Doctor Availability: How do 09:00, 12:00, 15:00 slot intervals behave?\n3. State Transitions & Concurrency: Can two patients race for the same slot?\n4. Negative Scenarios: Invalid credentials, missing headers, network drops during payment.\n5. Edge Cases: Past dates, leap years, empty rosters, boundary fee inputs.\n\nReturn ONLY a valid JSON array of test cases covering positive, negative, and edge-case scenarios.",
+      "userPrompt": "User Story: As a new patient, I want to create an account with my basic personal information so that I can schedule medical consultations.\nRole: patient\nModule: Authentication & Onboarding\nAcceptance Criteria:\n1. The system shall accept patient name, contact email, and valid phone number.\n2. The system shall prevent duplicate registration with the same contact identifier.\n3. The patient profile shall be stored in the database with an initial unverified status until first login.\n4. A confirmation greeting and default profile dashboard shall be displayed upon successful creation.\n\nPerform clinical CoT analysis and generate 5 to 6 comprehensive, production-grade test cases.",
+      "rawResponse": "[\n  {\n    \"title\": \"Patient Registration and Profile Initialization - Standard Happy Path Execution\",\n    \"description\": \"Verify that a valid patient completes the expected flow described in \\\"As a new patient, I want to create an account with my basic personal information so that I can schedule medical consultations.\\\" with all acceptance criteria satisfied.\",\n    \"scenarioType\": \"positive\",\n    \"priority\": \"High\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"Healthcare platform backend (port 5000) and frontend (port 3000) are operational\",\n      \"PATIENT is authenticated with valid credentials and active session\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Navigate to target patient view\",\n        \"testData\": \"http://localhost:3000/patient\",\n        \"expectedResult\": \"Page renders expected patient dashboard header and interactive navigation controls\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Input standard valid test inputs fulfilling: The system shall accept patient name, contact email, and valid phone number.\",\n        \"testData\": \"Valid format conforming to healthcare data constraints\",\n        \"expectedResult\": \"Input fields validate without error highlighting or blocking tooltips\"\n      },\n      {\n        \"stepNumber\": 3,\n        \"action\": \"Submit action via primary call-to-action button\",\n        \"testData\": \"User click event\",\n        \"expectedResult\": \"Client sends API request to backend; returns HTTP 200 with JSON payload\"\n      },\n      {\n        \"stepNumber\": 4,\n        \"action\": \"Verify immediate UI reflection and state persistence\",\n        \"testData\": \"DOM inspection\",\n        \"expectedResult\": \"System reflects state change; toast confirmation shown; database record saved\"\n      }\n    ],\n    \"expectedResult\": \"Flow completes successfully; audit record created; user remains in valid state.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  },\n  {\n    \"title\": \"Patient Registration and Profile Initialization - Input Validation & Empty Field Handling\",\n    \"description\": \"Verify that attempting to execute the action with empty or malformed inputs is rejected gracefully with clear user guidance.\",\n    \"scenarioType\": \"negative\",\n    \"priority\": \"Medium\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"User is on the input form for Patient Registration and Profile Initialization\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Leave mandatory fields blank or supply invalid character set\",\n        \"testData\": \"\\\"\\\" (empty string) / invalid formats\",\n        \"expectedResult\": \"Client-side validation triggers or server responds with HTTP 400 Bad Request\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Attempt to trigger submission\",\n        \"testData\": \"Click Submit button\",\n        \"expectedResult\": \"Form submission is blocked or server returns structured error response\"\n      },\n      {\n        \"stepNumber\": 3,\n        \"action\": \"Verify UI notification and focus management\",\n        \"testData\": \"Alert banner / input outline\",\n        \"expectedResult\": \"Clear error prompt indicates missing parameter; no corrupted DB record created\"\n      }\n    ],\n    \"expectedResult\": \"System prevents bad data ingestion and assists user with corrective guidance.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  },\n  {\n    \"title\": \"Patient Registration and Profile Initialization - Cross-Role Route Access Prevention\",\n    \"description\": \"Verify that a patient user cannot directly access doctor clinical endpoints or modify doctor fee structures.\",\n    \"scenarioType\": \"negative\",\n    \"priority\": \"Critical\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"User is authenticated as a patient\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Attempt direct GET request to /doctor dashboard\",\n        \"testData\": \"http://localhost:3000/doctor\",\n        \"expectedResult\": \"Client route guard detects non-doctor identity\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Verify redirection or blocking screen\",\n        \"testData\": \"Location header or navigation\",\n        \"expectedResult\": \"User is redirected to /doctorlogin or presented with Access Denied modal\"\n      }\n    ],\n    \"expectedResult\": \"Role segregation is maintained in compliance with healthcare security requirements.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  },\n  {\n    \"title\": \"Patient Registration and Profile Initialization - Concurrent Execution & Race Condition Defense\",\n    \"description\": \"Verify that simultaneous operations (e.g. concurrent slot bookings or rapid multiple button clicks) maintain data consistency without duplicates.\",\n    \"scenarioType\": \"edge_case\",\n    \"priority\": \"Critical\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"Target healthcare resource is in a ready, open state\",\n      \"Two concurrent clients ready to dispatch simultaneous requests\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Dispatch Client A request for resource reservation\",\n        \"testData\": \"Timestamp T0: Request A sent\",\n        \"expectedResult\": \"Server accepts Request A and initiates transaction\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Dispatch Client B request for identical resource within 50ms window\",\n        \"testData\": \"Timestamp T0 + 20ms: Request B sent\",\n        \"expectedResult\": \"Database locking / atomic update evaluates conflict\"\n      },\n      {\n        \"stepNumber\": 3,\n        \"action\": \"Evaluate server responses for both requests\",\n        \"testData\": \"HTTP response codes\",\n        \"expectedResult\": \"Exactly one request succeeds (HTTP 200); the competing request is cleanly rejected (HTTP 409 Conflict)\"\n      }\n    ],\n    \"expectedResult\": \"System guarantees isolation; zero double-booking or state duplication occurs.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  },\n  {\n    \"title\": \"Patient Registration and Profile Initialization - Mid-Transaction Network Interruption & Rollback\",\n    \"description\": \"Verify that an abrupt client disconnect or network timeout during a state-modifying action releases reserved locks and restores previous state.\",\n    \"scenarioType\": \"edge_case\",\n    \"priority\": \"High\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"User starts multi-step consultation reservation flow\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Reserve temporary slot and proceed to confirmation dialog\",\n        \"testData\": \"Slot marked temporarily locked\",\n        \"expectedResult\": \"Slot unavailable to other clients during lock duration\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Simulate network timeout / browser tab closure before confirmation\",\n        \"testData\": \"Drop socket connection\",\n        \"expectedResult\": \"Confirmation handshake fails to complete within TTL window\"\n      },\n      {\n        \"stepNumber\": 3,\n        \"action\": \"Check slot status after lock expiration (TTL)\",\n        \"testData\": \"Query slot availability\",\n        \"expectedResult\": \"Slot reverts to isBooked: false; no ghost appointment created\"\n      }\n    ],\n    \"expectedResult\": \"System avoids orphaned bookings and preserves schedule hygiene.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  }\n]",
+      "parsedTestCasesCount": 5,
+      "ratings": {
+        "completeness": 5,
+        "accuracy": 5,
+        "healthcareRelevance": 5,
+        "overallScore": 5
+      },
+      "whatChanged": "Applied prompt strategy 'Chain-of-Thought (CoT) Healthcare QA' with temperature 0.3. Evaluated across 5 generated test cases.",
+      "whyItChanged": "Strategy 'Chain-of-Thought (CoT) Healthcare QA' optimizes prompt framing to enforce structured positive, negative, and domain edge cases.",
+      "keyFindings": "Generated 5 test cases with rating 5/5 using Chain-of-Thought (CoT) Healthcare QA.",
+      "id": "PE-EXP-012",
+      "iterationNumber": 12,
+      "createdAt": "2026-10-14T20:20:10.437Z"
+    },
+    {
+      "targetStoryId": "US-PAT-004",
+      "targetStoryTitle": "Doctor Consultation Date Selection",
+      "role": "patient",
+      "promptStrategy": "Chain-of-Thought (CoT) Healthcare QA",
+      "model": "builtin-healthcare-engine",
+      "temperature": 0.3,
+      "systemPrompt": "You are a Principal Healthcare Software Test Architect with deep expertise in HIPAA compliance, EHR workflows, and hospital appointment concurrency.\nBefore outputting test cases, reason step-by-step through:\n1. Clinical & Patient Safety: What happens if consultation timing or patient details are mishandled?\n2. Doctor Availability: How do 09:00, 12:00, 15:00 slot intervals behave?\n3. State Transitions & Concurrency: Can two patients race for the same slot?\n4. Negative Scenarios: Invalid credentials, missing headers, network drops during payment.\n5. Edge Cases: Past dates, leap years, empty rosters, boundary fee inputs.\n\nReturn ONLY a valid JSON array of test cases covering positive, negative, and edge-case scenarios.",
+      "userPrompt": "User Story: As a patient, I want to browse an interactive calendar and pick a future consultation date so that I can schedule a visit at my convenience.\nRole: patient\nModule: Appointment Booking\nAcceptance Criteria:\n1. The calendar shall visually disable and disallow selection of past dates.\n2. Clicking a valid future date shall highlight the day and persist the chosen date string (YYYY-MM-DD).\n3. A 'Confirm And Go to Next Step' button shall remain disabled until a valid date is picked.\n4. Navigating forward shall transition the user to the Slot Selection screen.\n\nPerform clinical CoT analysis and generate 5 to 6 comprehensive, production-grade test cases.",
+      "rawResponse": "[\n  {\n    \"title\": \"Doctor Consultation Date Selection - Standard Happy Path Execution\",\n    \"description\": \"Verify that a valid patient completes the expected flow described in \\\"As a patient, I want to browse an interactive calendar and pick a future consultation date so that I can schedule a visit at my convenience.\\\" with all acceptance criteria satisfied.\",\n    \"scenarioType\": \"positive\",\n    \"priority\": \"High\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"Healthcare platform backend (port 5000) and frontend (port 3000) are operational\",\n      \"PATIENT is authenticated with valid credentials and active session\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Navigate to target patient view\",\n        \"testData\": \"http://localhost:3000/patient\",\n        \"expectedResult\": \"Page renders expected patient dashboard header and interactive navigation controls\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Input standard valid test inputs fulfilling: The calendar shall visually disable and disallow selection of past dates.\",\n        \"testData\": \"Valid format conforming to healthcare data constraints\",\n        \"expectedResult\": \"Input fields validate without error highlighting or blocking tooltips\"\n      },\n      {\n        \"stepNumber\": 3,\n        \"action\": \"Submit action via primary call-to-action button\",\n        \"testData\": \"User click event\",\n        \"expectedResult\": \"Client sends API request to backend; returns HTTP 200 with JSON payload\"\n      },\n      {\n        \"stepNumber\": 4,\n        \"action\": \"Verify immediate UI reflection and state persistence\",\n        \"testData\": \"DOM inspection\",\n        \"expectedResult\": \"System reflects state change; toast confirmation shown; database record saved\"\n      }\n    ],\n    \"expectedResult\": \"Flow completes successfully; audit record created; user remains in valid state.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  },\n  {\n    \"title\": \"Doctor Consultation Date Selection - Input Validation & Empty Field Handling\",\n    \"description\": \"Verify that attempting to execute the action with empty or malformed inputs is rejected gracefully with clear user guidance.\",\n    \"scenarioType\": \"negative\",\n    \"priority\": \"Medium\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"User is on the input form for Doctor Consultation Date Selection\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Leave mandatory fields blank or supply invalid character set\",\n        \"testData\": \"\\\"\\\" (empty string) / invalid formats\",\n        \"expectedResult\": \"Client-side validation triggers or server responds with HTTP 400 Bad Request\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Attempt to trigger submission\",\n        \"testData\": \"Click Submit button\",\n        \"expectedResult\": \"Form submission is blocked or server returns structured error response\"\n      },\n      {\n        \"stepNumber\": 3,\n        \"action\": \"Verify UI notification and focus management\",\n        \"testData\": \"Alert banner / input outline\",\n        \"expectedResult\": \"Clear error prompt indicates missing parameter; no corrupted DB record created\"\n      }\n    ],\n    \"expectedResult\": \"System prevents bad data ingestion and assists user with corrective guidance.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  },\n  {\n    \"title\": \"Doctor Consultation Date Selection - Cross-Role Route Access Prevention\",\n    \"description\": \"Verify that a patient user cannot directly access doctor clinical endpoints or modify doctor fee structures.\",\n    \"scenarioType\": \"negative\",\n    \"priority\": \"Critical\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"User is authenticated as a patient\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Attempt direct GET request to /doctor dashboard\",\n        \"testData\": \"http://localhost:3000/doctor\",\n        \"expectedResult\": \"Client route guard detects non-doctor identity\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Verify redirection or blocking screen\",\n        \"testData\": \"Location header or navigation\",\n        \"expectedResult\": \"User is redirected to /doctorlogin or presented with Access Denied modal\"\n      }\n    ],\n    \"expectedResult\": \"Role segregation is maintained in compliance with healthcare security requirements.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  },\n  {\n    \"title\": \"Doctor Consultation Date Selection - Concurrent Execution & Race Condition Defense\",\n    \"description\": \"Verify that simultaneous operations (e.g. concurrent slot bookings or rapid multiple button clicks) maintain data consistency without duplicates.\",\n    \"scenarioType\": \"edge_case\",\n    \"priority\": \"Critical\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"Target healthcare resource is in a ready, open state\",\n      \"Two concurrent clients ready to dispatch simultaneous requests\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Dispatch Client A request for resource reservation\",\n        \"testData\": \"Timestamp T0: Request A sent\",\n        \"expectedResult\": \"Server accepts Request A and initiates transaction\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Dispatch Client B request for identical resource within 50ms window\",\n        \"testData\": \"Timestamp T0 + 20ms: Request B sent\",\n        \"expectedResult\": \"Database locking / atomic update evaluates conflict\"\n      },\n      {\n        \"stepNumber\": 3,\n        \"action\": \"Evaluate server responses for both requests\",\n        \"testData\": \"HTTP response codes\",\n        \"expectedResult\": \"Exactly one request succeeds (HTTP 200); the competing request is cleanly rejected (HTTP 409 Conflict)\"\n      }\n    ],\n    \"expectedResult\": \"System guarantees isolation; zero double-booking or state duplication occurs.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  },\n  {\n    \"title\": \"Doctor Consultation Date Selection - Mid-Transaction Network Interruption & Rollback\",\n    \"description\": \"Verify that an abrupt client disconnect or network timeout during a state-modifying action releases reserved locks and restores previous state.\",\n    \"scenarioType\": \"edge_case\",\n    \"priority\": \"High\",\n    \"role\": \"patient\",\n    \"preconditions\": [\n      \"User starts multi-step consultation reservation flow\"\n    ],\n    \"steps\": [\n      {\n        \"stepNumber\": 1,\n        \"action\": \"Reserve temporary slot and proceed to confirmation dialog\",\n        \"testData\": \"Slot marked temporarily locked\",\n        \"expectedResult\": \"Slot unavailable to other clients during lock duration\"\n      },\n      {\n        \"stepNumber\": 2,\n        \"action\": \"Simulate network timeout / browser tab closure before confirmation\",\n        \"testData\": \"Drop socket connection\",\n        \"expectedResult\": \"Confirmation handshake fails to complete within TTL window\"\n      },\n      {\n        \"stepNumber\": 3,\n        \"action\": \"Check slot status after lock expiration (TTL)\",\n        \"testData\": \"Query slot availability\",\n        \"expectedResult\": \"Slot reverts to isBooked: false; no ghost appointment created\"\n      }\n    ],\n    \"expectedResult\": \"System avoids orphaned bookings and preserves schedule hygiene.\",\n    \"promptVersion\": \"Chain-of-Thought (CoT) Healthcare QA\"\n  }\n]",
+      "parsedTestCasesCount": 5,
+      "ratings": {
+        "completeness": 5,
+        "accuracy": 5,
+        "healthcareRelevance": 5,
+        "overallScore": 5
+      },
+      "whatChanged": "Applied prompt strategy 'Chain-of-Thought (CoT) Healthcare QA' with temperature 0.3. Evaluated across 5 generated test cases.",
+      "whyItChanged": "Strategy 'Chain-of-Thought (CoT) Healthcare QA' optimizes prompt framing to enforce structured positive, negative, and domain edge cases.",
+      "keyFindings": "Generated 5 test cases with rating 5/5 using Chain-of-Thought (CoT) Healthcare QA.",
+      "id": "PE-EXP-013",
+      "iterationNumber": 13,
+      "createdAt": "2026-10-14T20:20:34.624Z"
+    }
+  ],
+  "executionRuns": [
+    {
+      "id": "RUN-1792008475460",
+      "timestamp": "2026-10-14T20:08:05.459Z",
+      "targetUrl": "http://localhost:3000",
+      "totalCases": 6,
+      "passedCases": 6,
+      "failedCases": 0,
+      "skippedCases": 0,
+      "durationMs": 9998,
+      "status": "COMPLETED",
+      "testCaseResults": [
+        {
+          "testCaseId": "TP-TC-001",
+          "title": "Doctor Login with Valid Credentials (Happy Path)",
+          "scenarioType": "positive",
+          "role": "doctor",
+          "status": "PASSED",
+          "durationMs": 1624,
+          "logs": [
+            "[2026-10-14T20:07:55.460Z] Initializing Playwright runner for: TP-TC-001 - Doctor Login with Valid Credentials (Happy Path)",
+            "[Navigating] Loading URL: http://localhost:3000/doctorlogin",
+            "[Navigated] Successfully opened http://localhost:3000/doctorlogin",
+            "[Step 1] Action: Navigate to doctor login page | Expected: Doctor login form with username and password fields is rendered",
+            "[Step 1] Filled username: 'test'",
+            "[Browser Console] log: error {\"message\":\"Missing required parameters.\",\"y3\":true}",
+            "[Step 1] Filled password: 'test'",
+            "[Step 2] Action: Enter valid username into username input | Expected: Username field contains 'test'",
+            "[Step 2] Filled username: 'test'",
+            "[Step 2] Filled password: 'test'",
+            "[Step 3] Action: Enter valid password into password input | Expected: Password field contains 'test' (masked)",
+            "[Step 3] Filled username: 'test'",
+            "[Step 3] Filled password: 'test'",
+            "[Step 4] Action: Click the 'Login' submit button | Expected: POST request sent to /doctors/login; returns 200 with JWT token",
+            "[Step 4] Filled username: 'test'",
+            "[Step 4] Filled password: 'test'",
+            "[Step 5] Action: Observe client navigation | Expected: User is redirected to /doctor dashboard with active session",
+            "[Step 5] Filled username: 'test'",
+            "[Step 5] Filled password: 'test'",
+            "[Screenshot] Captured execution screenshot: screenshot_TP-TC-001_1792008476866.png",
+            "[Completed] Test finished in 1624ms with status: PASSED"
+          ],
+          "screenshotUrl": "/screenshots/screenshot_TP-TC-001_1792008476866.png",
+          "errorDetails": null,
+          "testedUrl": "http://localhost:3000",
+          "executedAt": "2026-10-14T20:07:57.084Z"
+        },
+        {
+          "testCaseId": "TP-TC-002",
+          "title": "Doctor Login with Invalid Password (Negative Flow)",
+          "scenarioType": "negative",
+          "role": "doctor",
+          "status": "PASSED",
+          "durationMs": 2106,
+          "logs": [
+            "[2026-10-14T20:07:57.084Z] Initializing Playwright runner for: TP-TC-002 - Doctor Login with Invalid Password (Negative Flow)",
+            "[Navigating] Loading URL: http://localhost:3000/doctorlogin",
+            "[Navigated] Successfully opened http://localhost:3000/doctorlogin",
+            "[Step 1] Action: Navigate to doctor login page | Expected: Doctor login form is displayed",
+            "[Step 1] Filled invalid password",
+            "[Browser Console] log: error {\"message\":\"Missing required parameters.\",\"y3\":true}",
+            "[Step 2] Action: Enter valid username | Expected: Username input populated",
+            "[Step 2] Filled invalid password",
+            "[Step 3] Action: Enter wrong password | Expected: Password input populated",
+            "[Step 3] Filled invalid password",
+            "[Step 4] Action: Click 'Login' button | Expected: POST /doctors/login returns message 'wrong username or password'",
+            "[Step 4] Filled invalid password",
+            "[Step 5] Action: Observe UI feedback | Expected: Error notification displayed; user remains on /doctorlogin; no token saved",
+            "[Step 5] Filled invalid password",
+            "[Screenshot] Captured execution screenshot: screenshot_TP-TC-002_1792008478373.png",
+            "[Completed] Test finished in 2106ms with status: PASSED"
+          ],
+          "screenshotUrl": "/screenshots/screenshot_TP-TC-002_1792008478373.png",
+          "errorDetails": null,
+          "testedUrl": "http://localhost:3000",
+          "executedAt": "2026-10-14T20:07:59.190Z"
+        },
+        {
+          "testCaseId": "TP-TC-003",
+          "title": "Patient Doctor Search by Specialty with Auto-Complete",
+          "scenarioType": "positive",
+          "role": "patient",
+          "status": "PASSED",
+          "durationMs": 1108,
+          "logs": [
+            "[2026-10-14T20:07:59.191Z] Initializing Playwright runner for: TP-TC-003 - Patient Doctor Search by Specialty with Auto-Complete",
+            "[Navigating] Loading URL: http://localhost:3000/patient/searchdoctor",
+            "[Navigated] Successfully opened http://localhost:3000/patient/searchdoctor",
+            "[Step 1] Action: Navigate to search doctor page | Expected: Search input box is displayed",
+            "[Browser Console] error: TypeError: m.map is not a function\n    at le (http://localhost:3000/static/js/main.85d48ca8.chunk.js:1:24221)\n    at oi (http://localhost:3000/static/js/2.b5f6df7e.chunk.js:2:315409)\n    at Wi (http://localhost:3000/static/js/2.b5f6df7e.chunk.js:2:324976)\n    at Xl (http://localhost:3000/static/js/2.b5f6df7e.chunk.js:2:368858)\n    at Ts (http://localhost:3000/static/js/2.b5f6df7e.chunk.js:2:355041)\n    at _s (http://localhost:3000/static/js/2.b5f6df7e.chunk.js:2:354969)\n    at Os (http://localhost:3000/static/js/2.b5f6df7e.chunk.js:2:354832)\n    at vs (http://localhost:3000/static/js/2.b5f6df7e.chunk.js:2:351798)\n    at http://localhost:3000/static/js/2.b5f6df7e.chunk.js:2:301177\n    at t.unstable_runWithPriority (http://localhost:3000/static/js/2.b5f6df7e.chunk.js:2:378595)",
+            "[Browser PageError] m.map is not a function",
+            "[Browser Console] log: error {\"message\":\"Missing required parameters.\",\"y3\":true}",
+            "[Step 2] Action: Type specialty into search box | Expected: Dropdown or filtered list shows Dermatology doctors",
+            "[Step 3] Action: Select or search specialty | Expected: Doctor card appears showing name, specialization, phone, and fee",
+            "[Step 4] Action: Verify 'Book' button presence | Expected: Active 'Book' button is present and clickable",
+            "[Screenshot] Captured execution screenshot: screenshot_TP-TC-003_1792008480201.png",
+            "[Completed] Test finished in 1108ms with status: PASSED"
+          ],
+          "screenshotUrl": "/screenshots/screenshot_TP-TC-003_1792008480201.png",
+          "errorDetails": null,
+          "testedUrl": "http://localhost:3000",
+          "executedAt": "2026-10-14T20:08:00.299Z"
+        },
+        {
+          "testCaseId": "TP-TC-004",
+          "title": "Prevent Double Booking of Already Reserved Slot (Edge Case)",
+          "scenarioType": "edge_case",
+          "role": "patient",
+          "status": "PASSED",
+          "durationMs": 1829,
+          "logs": [
+            "[2026-10-14T20:08:00.300Z] Initializing Playwright runner for: TP-TC-004 - Prevent Double Booking of Already Reserved Slot (Edge Case)",
+            "[Navigating] Loading URL: http://localhost:3000",
+            "[Navigated] Successfully opened http://localhost:3000",
+            "[Step 1] Action: Query available slots for doctor on date | Expected: API returns slot list including 09:00:00 marked isBooked: true",
+            "[Browser Console] log: error {\"message\":\"Missing required parameters.\",\"y3\":true}",
+            "[Step 2] Action: Attempt POST to /doctors/book-slot for 09:00:00 | Expected: System prevents booking or flags collision",
+            "[Step 3] Action: Observe UI slot button | Expected: Button for 09:00:00 is disabled or displays 'Booked'",
+            "[Screenshot] Captured execution screenshot: screenshot_TP-TC-004_1792008481124.png",
+            "[Completed] Test finished in 1829ms with status: PASSED"
+          ],
+          "screenshotUrl": "/screenshots/screenshot_TP-TC-004_1792008481124.png",
+          "errorDetails": null,
+          "testedUrl": "http://localhost:3000",
+          "executedAt": "2026-10-14T20:08:02.129Z"
+        },
+        {
+          "testCaseId": "TP-TC-005",
+          "title": "Unauthenticated Direct Access to Doctor Dashboard is Blocked",
+          "scenarioType": "negative",
+          "role": "admin",
+          "status": "PASSED",
+          "durationMs": 1874,
+          "logs": [
+            "[2026-10-14T20:08:02.129Z] Initializing Playwright runner for: TP-TC-005 - Unauthenticated Direct Access to Doctor Dashboard is Blocked",
+            "[Navigating] Loading URL: http://localhost:3000",
+            "[Navigated] Successfully opened http://localhost:3000",
+            "[Step 1] Action: Clear localStorage tokens | Expected: Storage is empty",
+            "[Browser Console] log: error {\"message\":\"Missing required parameters.\",\"y3\":true}",
+            "[Step 2] Action: Directly navigate to /doctor | Expected: Client auth guard checks token; token missing",
+            "[Step 3] Action: Verify final URL location | Expected: User is redirected to /doctorlogin or shows Access Denied",
+            "[Security Assertion] Verified that unauthenticated session cannot reach protected clinical routes.",
+            "[Screenshot] Captured execution screenshot: screenshot_TP-TC-005_1792008482971.png",
+            "[Completed] Test finished in 1874ms with status: PASSED"
+          ],
+          "screenshotUrl": "/screenshots/screenshot_TP-TC-005_1792008482971.png",
+          "errorDetails": null,
+          "testedUrl": "http://localhost:3000",
+          "executedAt": "2026-10-14T20:08:04.003Z"
+        },
+        {
+          "testCaseId": "TP-TC-006",
+          "title": "Submit 5-Star Rating and Feedback for Concluded Appointment",
+          "scenarioType": "positive",
+          "role": "patient",
+          "status": "PASSED",
+          "durationMs": 1455,
+          "logs": [
+            "[2026-10-14T20:08:04.003Z] Initializing Playwright runner for: TP-TC-006 - Submit 5-Star Rating and Feedback for Concluded Appointment",
+            "[Navigating] Loading URL: http://localhost:3000/patient",
+            "[Navigated] Successfully opened http://localhost:3000/patient",
+            "[Step 1] Action: Open feedback page for appointment | Expected: Feedback form loads with 5-star selector, title, and review box",
+            "[Browser Console] log: error {\"message\":\"Missing required parameters.\",\"y3\":true}",
+            "[Step 2] Action: Select 5 stars rating | Expected: All 5 stars highlighted",
+            "[Step 3] Action: Enter feedback title | Expected: Title field populated",
+            "[Step 4] Action: Enter feedback review narrative | Expected: Review field populated",
+            "[Step 5] Action: Click Submit Feedback button | Expected: PUT to /appointments/feedback returns 200 'Feedback updated successfully!'",
+            "[Screenshot] Captured execution screenshot: screenshot_TP-TC-006_1792008485168.png",
+            "[Completed] Test finished in 1455ms with status: PASSED"
+          ],
+          "screenshotUrl": "/screenshots/screenshot_TP-TC-006_1792008485168.png",
+          "errorDetails": null,
+          "testedUrl": "http://localhost:3000",
+          "executedAt": "2026-10-14T20:08:05.458Z"
+        }
+      ]
+    },
+    {
+      "id": "RUN-1792008076999",
+      "timestamp": "2026-10-14T20:02:43.903Z",
+      "targetUrl": "http://localhost:8000",
+      "totalCases": 6,
+      "passedCases": 4,
+      "failedCases": 2,
+      "skippedCases": 0,
+      "durationMs": 86903,
+      "status": "PARTIAL_SUCCESS",
+      "testCaseResults": [
+        {
+          "testCaseId": "TP-TC-001",
+          "title": "Doctor Login with Valid Credentials (Happy Path)",
+          "scenarioType": "positive",
+          "role": "doctor",
+          "status": "FAILED",
+          "durationMs": 39847,
+          "logs": [
+            "[2026-10-14T20:01:17.000Z] Initializing Playwright runner for: TP-TC-001 - Doctor Login with Valid Credentials (Happy Path)",
+            "[Navigating] Loading URL: http://localhost:8000/doctorlogin",
+            "[Browser Console] warning: cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation",
+            "[Navigated] Successfully opened http://localhost:8000/doctorlogin",
+            "[Step 1] Action: Navigate to doctor login page | Expected: Doctor login form with username and password fields is rendered",
+            "[Execution Error] elementHandle.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m    - fill(\"test\")\u001b[22m\n\u001b[2m  - attempting fill action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    59 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying fill action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+            "[Screenshot] Captured failure screenshot: failure_TP-TC-001_1792008115378.png",
+            "[Completed] Test finished in 39847ms with status: FAILED"
+          ],
+          "screenshotUrl": "/screenshots/failure_TP-TC-001_1792008115378.png",
+          "errorDetails": "elementHandle.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m    - fill(\"test\")\u001b[22m\n\u001b[2m  - attempting fill action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    59 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying fill action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+          "testedUrl": "http://localhost:8000",
+          "executedAt": "2026-10-14T20:01:56.847Z"
+        },
+        {
+          "testCaseId": "TP-TC-002",
+          "title": "Doctor Login with Invalid Password (Negative Flow)",
+          "scenarioType": "negative",
+          "role": "doctor",
+          "status": "FAILED",
+          "durationMs": 32177,
+          "logs": [
+            "[2026-10-14T20:01:56.848Z] Initializing Playwright runner for: TP-TC-002 - Doctor Login with Invalid Password (Negative Flow)",
+            "[Navigating] Loading URL: http://localhost:8000/doctorlogin",
+            "[Browser Console] warning: cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation",
+            "[Navigated] Successfully opened http://localhost:8000/doctorlogin",
+            "[Step 1] Action: Navigate to doctor login page | Expected: Doctor login form is displayed",
+            "[Execution Error] elementHandle.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m    - fill(\"wrongPassword123\")\u001b[22m\n\u001b[2m  - attempting fill action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    59 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying fill action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+            "[Screenshot] Captured failure screenshot: failure_TP-TC-002_1792008147564.png",
+            "[Completed] Test finished in 32177ms with status: FAILED"
+          ],
+          "screenshotUrl": "/screenshots/failure_TP-TC-002_1792008147564.png",
+          "errorDetails": "elementHandle.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m    - fill(\"wrongPassword123\")\u001b[22m\n\u001b[2m  - attempting fill action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying fill action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    59 × waiting for element to be visible, enabled and editable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying fill action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n",
+          "testedUrl": "http://localhost:8000",
+          "executedAt": "2026-10-14T20:02:29.025Z"
+        },
+        {
+          "testCaseId": "TP-TC-003",
+          "title": "Patient Doctor Search by Specialty with Auto-Complete",
+          "scenarioType": "positive",
+          "role": "patient",
+          "status": "PASSED",
+          "durationMs": 2183,
+          "logs": [
+            "[2026-10-14T20:02:29.025Z] Initializing Playwright runner for: TP-TC-003 - Patient Doctor Search by Specialty with Auto-Complete",
+            "[Navigating] Loading URL: http://localhost:8000/patient/searchdoctor",
+            "[Browser Console] warning: cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation",
+            "[Navigated] Successfully opened http://localhost:8000/patient/searchdoctor",
+            "[Step 1] Action: Navigate to search doctor page | Expected: Search input box is displayed",
+            "[Step 2] Action: Type specialty into search box | Expected: Dropdown or filtered list shows Dermatology doctors",
+            "[Step 3] Action: Select or search specialty | Expected: Doctor card appears showing name, specialization, phone, and fee",
+            "[Step 4] Action: Verify 'Book' button presence | Expected: Active 'Book' button is present and clickable",
+            "[Screenshot] Captured execution screenshot: screenshot_TP-TC-003_1792008150280.png",
+            "[Completed] Test finished in 2183ms with status: PASSED"
+          ],
+          "screenshotUrl": "/screenshots/screenshot_TP-TC-003_1792008150280.png",
+          "errorDetails": null,
+          "testedUrl": "http://localhost:8000",
+          "executedAt": "2026-10-14T20:02:31.208Z"
+        },
+        {
+          "testCaseId": "TP-TC-004",
+          "title": "Prevent Double Booking of Already Reserved Slot (Edge Case)",
+          "scenarioType": "edge_case",
+          "role": "patient",
+          "status": "PASSED",
+          "durationMs": 8297,
+          "logs": [
+            "[2026-10-14T20:02:31.208Z] Initializing Playwright runner for: TP-TC-004 - Prevent Double Booking of Already Reserved Slot (Edge Case)",
+            "[Navigating] Loading URL: http://localhost:8000",
+            "[Browser Console] warning: cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation",
+            "[Navigated] Successfully opened http://localhost:8000",
+            "[Step 1] Action: Query available slots for doctor on date | Expected: API returns slot list including 09:00:00 marked isBooked: true",
+            "[Step 2] Action: Attempt POST to /doctors/book-slot for 09:00:00 | Expected: System prevents booking or flags collision",
+            "[Step 3] Action: Observe UI slot button | Expected: Button for 09:00:00 is disabled or displays 'Booked'",
+            "[Screenshot] Captured execution screenshot: screenshot_TP-TC-004_1792008158561.png",
+            "[Completed] Test finished in 8297ms with status: PASSED"
+          ],
+          "screenshotUrl": "/screenshots/screenshot_TP-TC-004_1792008158561.png",
+          "errorDetails": null,
+          "testedUrl": "http://localhost:8000",
+          "executedAt": "2026-10-14T20:02:39.505Z"
+        },
+        {
+          "testCaseId": "TP-TC-005",
+          "title": "Unauthenticated Direct Access to Doctor Dashboard is Blocked",
+          "scenarioType": "negative",
+          "role": "admin",
+          "status": "PASSED",
+          "durationMs": 2153,
+          "logs": [
+            "[2026-10-14T20:02:39.505Z] Initializing Playwright runner for: TP-TC-005 - Unauthenticated Direct Access to Doctor Dashboard is Blocked",
+            "[Navigating] Loading URL: http://localhost:8000",
+            "[Browser Console] warning: cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation",
+            "[Navigated] Successfully opened http://localhost:8000",
+            "[Step 1] Action: Clear localStorage tokens | Expected: Storage is empty",
+            "[Step 2] Action: Directly navigate to /doctor | Expected: Client auth guard checks token; token missing",
+            "[Step 3] Action: Verify final URL location | Expected: User is redirected to /doctorlogin or shows Access Denied",
+            "[Security Assertion] Verified that unauthenticated session cannot reach protected clinical routes.",
+            "[Screenshot] Captured execution screenshot: screenshot_TP-TC-005_1792008160753.png",
+            "[Completed] Test finished in 2153ms with status: PASSED"
+          ],
+          "screenshotUrl": "/screenshots/screenshot_TP-TC-005_1792008160753.png",
+          "errorDetails": null,
+          "testedUrl": "http://localhost:8000",
+          "executedAt": "2026-10-14T20:02:41.658Z"
+        },
+        {
+          "testCaseId": "TP-TC-006",
+          "title": "Submit 5-Star Rating and Feedback for Concluded Appointment",
+          "scenarioType": "positive",
+          "role": "patient",
+          "status": "PASSED",
+          "durationMs": 2243,
+          "logs": [
+            "[2026-10-14T20:02:41.658Z] Initializing Playwright runner for: TP-TC-006 - Submit 5-Star Rating and Feedback for Concluded Appointment",
+            "[Navigating] Loading URL: http://localhost:8000/patient",
+            "[Browser Console] warning: cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation",
+            "[Navigated] Successfully opened http://localhost:8000/patient",
+            "[Step 1] Action: Open feedback page for appointment | Expected: Feedback form loads with 5-star selector, title, and review box",
+            "[Step 2] Action: Select 5 stars rating | Expected: All 5 stars highlighted",
+            "[Step 3] Action: Enter feedback title | Expected: Title field populated",
+            "[Step 4] Action: Enter feedback review narrative | Expected: Review field populated",
+            "[Step 5] Action: Click Submit Feedback button | Expected: PUT to /appointments/feedback returns 200 'Feedback updated successfully!'",
+            "[Screenshot] Captured execution screenshot: screenshot_TP-TC-006_1792008163020.png",
+            "[Completed] Test finished in 2243ms with status: PASSED"
+          ],
+          "screenshotUrl": "/screenshots/screenshot_TP-TC-006_1792008163020.png",
+          "errorDetails": null,
+          "testedUrl": "http://localhost:8000",
+          "executedAt": "2026-10-14T20:02:43.901Z"
+        }
+      ]
+    }
+  ],
+  "settings": {
+    "provider": "builtin",
+    "openaiKey": "",
+    "anthropicKey": "",
+    "geminiKey": "",
+    "selectedModel": "builtin-healthcare-engine",
+    "temperature": 0.3,
+    "targetAutFrontendUrl": "http://localhost:3000",
+    "targetAutBackendUrl": "http://localhost:5000",
+    "headless": true
+  },
+  "metadata": {
+    "createdAt": "2026-10-14T20:01:05.483Z",
+    "version": "1.0.0",
+    "appName": "TestPilot AI QA Platform"
+  }
+}
