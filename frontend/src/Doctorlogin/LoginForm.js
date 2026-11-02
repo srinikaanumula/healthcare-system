@@ -1,3 +1,4 @@
+import getServerUrl from "../utils/url";
 import React, { useContext, useState } from 'react';
 import { Redirect, useHistory } from "react-router-dom";
 import { Container, Row, Col, Card, Form, CardHeader, CardBody, FormGroup, CardFooter, Button, Label, Input } from 'reactstrap'
@@ -14,7 +15,7 @@ const LoginForm = () => {
 	async function login() {
 		try {
 			const res = await axios.post(
-				`${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/doctors/login/`,
+				`${getServerUrl()}/doctors/login/`,
 				{
 					username: username,
 					password: password

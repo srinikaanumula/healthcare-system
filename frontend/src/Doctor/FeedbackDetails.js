@@ -1,3 +1,4 @@
+import getServerUrl from "../utils/url";
 import React, { useEffect, useState } from 'react';
 import Navbar from '../Basic/Navbar';
 import { Row, Input, Button } from 'reactstrap'
@@ -15,7 +16,7 @@ const FeedbackDetails = () => {
 		async function init() {
 			setIsLoading(true);
 			const { data } = await axios.get(
-				`${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/doctors/appointment/${id}`
+				`${getServerUrl()}/doctors/appointment/${id}`
 			);
 			
 			setFeedback(data?.feedback);

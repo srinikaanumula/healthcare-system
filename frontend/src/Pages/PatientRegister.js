@@ -1,3 +1,4 @@
+import getServerUrl from "../utils/url";
 import React, { useState, useContext } from 'react';
 import { useHistory, Link, Redirect } from 'react-router-dom';
 import axios from 'axios';
@@ -73,7 +74,7 @@ const PatientRegister = () => {
     setRegLoading(true);
 
     try {
-      const serverUrl = process.env.REACT_APP_SERVER_URL || 'http://localhost:5000';
+      const serverUrl = getServerUrl();
       const payload = {
         name: regName.trim(),
         email: regEmail.trim(),
@@ -126,7 +127,7 @@ const PatientRegister = () => {
     setLoginLoading(true);
 
     try {
-      const serverUrl = process.env.REACT_APP_SERVER_URL || 'http://localhost:5000';
+      const serverUrl = getServerUrl();
       const payload = {
         email: loginEmail.trim(),
         password: loginPassword
@@ -176,7 +177,7 @@ const PatientRegister = () => {
         window.localStorage.setItem('token', idToken);
         window.localStorage.setItem('googleId', pId);
 
-        const serverUrl = process.env.REACT_APP_SERVER_URL || 'http://localhost:5000';
+        const serverUrl = getServerUrl();
         const serverRes = await axios.post(`${serverUrl}/patients/google-login/`, {
           tokenId: idToken
         });

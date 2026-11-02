@@ -1,3 +1,4 @@
+import getServerUrl from "../utils/url";
 import { Button } from 'react-bootstrap';
 import React, { useContext } from 'react';
 import { Link, useHistory } from "react-router-dom";
@@ -24,7 +25,7 @@ const Card = ({ login = "Doctor", Image, link }) => {
         window.localStorage.setItem("googleId", profile.getId());
 
         const serverRes = await axios.post(
-          `${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/patients/google-login/`,
+          `${getServerUrl()}/patients/google-login/`,
           {
             tokenId: profile.getAuthResponse().id_token,
           }

@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Axios from "axios";
-// import { ListGroup, ListGroupItem } from "reactstrap";
-
 import {
   Row,
   Col,
@@ -9,53 +7,80 @@ import {
   Button,
   InputGroup,
   InputGroupAddon,
+  Spinner
 } from "reactstrap";
 
 import Trie from "./Trie.js";
 import specialization from "./specialization";
 import { Link } from "react-router-dom";
+import getServerUrl from "../utils/url";
 
 const Search = () => {
-  const [text, setText] = useState();
+  const [text, setText] = useState("");
   const [suggestions, setSuggestions] = useState([]);
+  const [Doctor, setDoctor] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const memoized_trie = useMemo(() => {
     const trie = new Trie();
-
-    // Insert
     for (let i = 0; i < specialization.length; i++) {
       trie.insert(specialization[i]);
     }
-
     return trie;
   }, []);
 
-  function onTextChanged(e) {
-    let value = e.target.value;
-    setText(value);
+  const fetchDoctor = async () => {
+    try {
+      setLoading(true);
+      const res = await Axios.get(`${getServerUrl()}/doctors/`);
+      if (res && Array.isArray(res.data)) {
+        setDoctor(res.data);
+      } else {
+        setDoctor([]);
+      }
+    } catch (err) {
+      console.error("Error fetching doctors list:", err);
+      setDoctor([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchDoctor();
-    value = value.toLowerCase();
-    if (value !== "") setSuggestions(memoized_trie.find(value));
-    else setSuggestions([]);
+  }, []);
+
+  function onTextChanged(e) {
+    const value = e.target.value || "";
+    setText(value);
+    const valLower = value.toLowerCase().trim();
+    if (valLower !== "") {
+      setSuggestions(memoized_trie.find(valLower));
+    } else {
+      setSuggestions([]);
+      fetchDoctor();
+    }
   }
 
   function suggestionSelected(value) {
     setText(value);
     setSuggestions([]);
+    UpdateDisplay(value);
   }
 
   function renderSuggestions() {
-    if (suggestions.length === 0) {
+    if (!suggestions || suggestions.length === 0) {
       return null;
     }
     return (
       <InputGroup>
-        <ul className="list-group dropdown-menu pt-0 pb-0">
+        <ul className="list-group dropdown-menu pt-0 pb-0 show" style={{ position: 'relative', width: '100%', zIndex: 10 }}>
           {suggestions.map((item) => (
             <li
-              className="list-group-item list-group-item-action"
+              className="list-group-item list-group-item-action cursor-pointer"
               onClick={() => suggestionSelected(item)}
               key={item}
+              style={{ cursor: 'pointer' }}
             >
               {item} 
             </li>
@@ -65,28 +90,18 @@ const Search = () => {
     );
   }
 
-  const [Doctor, setDoctor] = useState([]);
-
-  const fetchDoctor = async () => {
-    const { data } = await Axios.get(
-      `${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/doctors/`
-    );
-    setDoctor(data);
-    console.log(data);
-  };
-
-  const UpdateDisplay = (text) => {
-    setDoctor((Doctor) => {
-      return Doctor.filter(
-        (doctor) => doctor.specialization.toLowerCase() === text.toLowerCase()
+  const UpdateDisplay = (searchText) => {
+    if (!searchText || searchText.trim() === "") {
+      fetchDoctor();
+      return;
+    }
+    setDoctor((prevDocs) => {
+      if (!Array.isArray(prevDocs)) return [];
+      return prevDocs.filter(
+        (doc) => doc && doc.specialization && doc.specialization.toLowerCase().includes(searchText.toLowerCase().trim())
       );
     });
-    console.log(Doctor);
   };
-
-  useEffect(() => {
-    fetchDoctor();
-  }, []);
 
   return (
     <div>
@@ -96,67 +111,80 @@ const Search = () => {
             <Input
               value={text}
               type="text"
-              placeholder="Search Your Doctor"
+              placeholder="Search Doctor by Specialty (e.g. Cardiology, Dermatology, Pediatrics)"
               onChange={onTextChanged}
               className="mb-1"
             />
-            <div style={{ height: 10 }} className="">
-              <InputGroupAddon addonType="append">
-                <Button
-                  className="h-10 d-inline-block"
-                  color="primary"
-                  onClick={() => UpdateDisplay(text)}
-                >
-                  Search Doctor
-                </Button>
-              </InputGroupAddon>
-            </div>
+            <InputGroupAddon addonType="append">
+              <Button
+                color="primary"
+                onClick={() => UpdateDisplay(text)}
+              >
+                Search Doctor
+              </Button>
+              <Button
+                color="secondary"
+                onClick={() => { setText(""); fetchDoctor(); }}
+                className="ml-1"
+              >
+                Reset
+              </Button>
+            </InputGroupAddon>
           </InputGroup>
           {renderSuggestions()}
         </Col>
       </Row>
 
-      {/* <ListGroup> */}
       <div
         style={{ overflowY: "auto", overflowX: "hidden", maxHeight: "64vh", width: "100%" }}
-        className="col-12 col-md-12"
+        className="col-12 col-md-12 p-0"
       >
-        <div className="row">
-          {Doctor.map((doc) => (
-            // <ListGroupItem key={doc.id} className="mb-3">
-            <div className="col-sm-6 mb-2" key={doc._id}>
-              <div className="card">
-                <div className="card-body">
-                  <div className="text-info">
-                    <h6>
-                      Doctor Name:
-                      <span className="text-uppercase"> {doc.name}</span>
-                    </h6>
-                  </div>
-                  <div>Specialization : {doc.specialization}</div>
-                  <div>Phone Number : {doc.phoneNumber}</div>
-                  <div className="row mb-0 pb-0">
-                    <div className="col-md-6 ">
-                      FeesPerSession: {doc.feesPerSession}
+        {loading ? (
+          <div className="text-center p-5">
+            <Spinner color="warning" />
+            <p className="text-white mt-2 small">Loading available doctor profiles...</p>
+          </div>
+        ) : Array.isArray(Doctor) && Doctor.length > 0 ? (
+          <div className="row">
+            {Doctor.map((doc) => (
+              <div className="col-sm-6 mb-3" key={doc._id || doc.username || Math.random()}>
+                <div className="card shadow-sm h-100">
+                  <div className="card-body d-flex flex-column justify-content-between">
+                    <div>
+                      <h6 className="text-primary font-weight-bold mb-1">
+                        Dr. <span className="text-uppercase">{doc.name}</span>
+                      </h6>
+                      <div className="badge badge-info p-1 mb-2">{doc.specialization}</div>
+                      <div className="small text-muted mb-1">📞 {doc.phoneNumber || "Not provided"}</div>
+                      <div className="small text-muted mb-2">⏱ {doc.timing || "09:00 AM - 05:00 PM"}</div>
                     </div>
-                    <div
-                      className=" col align-self-end col-md-2 offset-md-3 inline"
-                      style={{ textAlign: "center" }}
-                    ><Link to={{ pathname: "/patient/selectdate", doctor: { doctor: doc } }}>
-                      <button className="btn btn-sm btn-primary"
-                     
-                      >  Book</button> </Link>
+                    <div className="row align-items-center mt-2 pt-2 border-top">
+                      <div className="col-6 font-weight-bold text-success">
+                        ₹ {doc.feesPerSession}
+                      </div>
+                      <div className="col-6 text-right">
+                        <Link to={{ pathname: "/patient/selectdate", doctor: { doctor: doc } }}>
+                          <button className="btn btn-sm btn-primary font-weight-bold px-3">
+                            Book Slot
+                          </button>
+                        </Link>
+                      </div>
                     </div>
                   </div>
-
-                  {/* </ListGroupItem> */}
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="col-12 text-center p-5 bg-dark text-white border border-secondary rounded">
+            <h5 className="mb-2">No doctors currently match your search</h5>
+            <p className="text-muted small mb-3">Try searching for a different specialty or click "Reset" to view all available doctors.</p>
+            <Button color="outline-warning" size="sm" onClick={() => { setText(""); fetchDoctor(); }}>
+              Show All Doctors
+            </Button>
+          </div>
+        )}
       </div>
-      {/* </ListGroup> */}
     </div>
   );
 };

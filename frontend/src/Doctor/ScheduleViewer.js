@@ -1,3 +1,4 @@
+import getServerUrl from "../utils/url";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Axios from "axios";
 import jwt_decode from "jwt-decode";
@@ -29,7 +30,7 @@ const ScheduleViewer = ({ initialTab = "today" }) => {
       if (!token) return;
       const decoded = jwt_decode(token);
       const doctorId = decoded._id || decoded.username;
-      const serverUrl = process.env.REACT_APP_SERVER_URL || 'http://localhost:5000';
+      const serverUrl = getServerUrl();
 
       const [todayRes, futureRes, prevRes, allRes] = await Promise.all([
         Axios.post(`${serverUrl}/doctors/todays-appointments`, { doctorId }).catch(() => ({ data: [] })),

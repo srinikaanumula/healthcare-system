@@ -1,3 +1,4 @@
+import getServerUrl from "../utils/url";
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import { useHistory } from "react-router-dom";
@@ -69,7 +70,7 @@ const Payment = (props) => {
       request.execute(function (event) {
         if (event && event.hangoutLink) {
           Axios.put(
-            `${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/appointments/add-meet-link`,
+            `${getServerUrl()}/appointments/add-meet-link`,
             {
               appointmentId: id,
               meetLink: event.hangoutLink
@@ -100,7 +101,7 @@ const Payment = (props) => {
     }
 
     const { data } = await Axios.post(
-      `${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/doctors/book-slot/`,
+      `${getServerUrl()}/doctors/book-slot/`,
       {
         googleId: googleId,
         patientName: patientName,
@@ -132,7 +133,7 @@ const Payment = (props) => {
     setIsProcessing(true);
     try {
       const { data } = await Axios.post(
-        `${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/patients/payment`,
+        `${getServerUrl()}/patients/payment`,
         {
           token,
           finalBalnce,

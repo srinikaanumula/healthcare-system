@@ -1,3 +1,4 @@
+import getServerUrl from "../utils/url";
 import React, { useContext } from "react";
 import Navbar from "../Basic/Navbar";
 import Leftside from "../Dashbaord/LeftsidePatient";
@@ -26,7 +27,7 @@ const PersonalDetails = () => {
     setLoading(true);
     const getPatientDetails = async () => {
       const res = await Axios.get(
-        `${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/patients/getPatientDetails/${activeGoogleId}`
+        `${getServerUrl()}/patients/getPatientDetails/${activeGoogleId}`
       );
       if (res.status === 200) {
         setPatient(res.data);

@@ -1,3 +1,4 @@
+import getServerUrl from "../utils/url";
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import { BsPencilSquare } from "react-icons/bs";
@@ -14,7 +15,7 @@ const PatientAppointments = () => {
   const fetchAppointments = async () => {
 
     const { data } = await Axios.post(
-      `${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/patients/previous-appointments/`,
+      `${getServerUrl()}/patients/previous-appointments/`,
       {
         googleId: localStorage.getItem("googleId"),
       }

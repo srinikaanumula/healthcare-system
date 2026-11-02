@@ -1,3 +1,4 @@
+import getServerUrl from "../utils/url";
 import React, { useState, useEffect } from "react";
 import { Link, useHistory } from "react-router-dom";
 import Navbar from "../Basic/Navbar";
@@ -18,7 +19,7 @@ const BookingSlots = (props) => {
     const fetchDate = async (dateToPost) => {
       try {
         const { data } = await Axios.post(
-          `${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/doctors/get-slots/`,
+          `${getServerUrl()}/doctors/get-slots/`,
           {
             doctorId: doctor._id,
             date: dateToPost

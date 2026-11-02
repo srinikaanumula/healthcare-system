@@ -1,3 +1,4 @@
+import getServerUrl from "../utils/url";
 import axios from 'axios';
 import React, { useContext, useState } from 'react';
 import { Redirect, useHistory } from 'react-router';
@@ -12,7 +13,7 @@ function PhoneNumber() {
 
     async function updatePhoneNumber() {
         try {
-            const res = await axios.put(`${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/patients/update-phone`,
+            const res = await axios.put(`${getServerUrl()}/patients/update-phone`,
                 {
                     googleId: googleId,
                     phoneNumber: number

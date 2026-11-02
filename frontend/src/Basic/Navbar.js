@@ -1,3 +1,4 @@
+import getServerUrl from "../utils/url";
 import React, { useContext } from "react";
 import { Link, useHistory } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -25,7 +26,7 @@ const Navbar = () => {
         window.localStorage.setItem("googleId", profile.getId());
 
         const serverRes = await axios.post(
-          `${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/patients/google-login/`,
+          `${getServerUrl()}/patients/google-login/`,
           {
             tokenId: profile.getAuthResponse().id_token,
           }

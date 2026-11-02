@@ -1,3 +1,4 @@
+import getServerUrl from "../utils/url";
 import React, { useState } from 'react';
 import Navbar from '../Basic/Navbar';
 import { Row, Input, Button } from 'reactstrap'
@@ -20,7 +21,7 @@ const Feedback = () => {
 	const putFeedback = async () => {
 		try {
 			const { data } = axios.put(
-				`${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/appointments/feedback/`,
+				`${getServerUrl()}/appointments/feedback/`,
 				{
 					appointmentId: appointmentId.id,
 					stars: rating,

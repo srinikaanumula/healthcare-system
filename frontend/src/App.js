@@ -1,3 +1,4 @@
+import ErrorBoundary from './Basic/ErrorBoundary';
 
 import React, { useEffect, useState } from "react";
 import "bootstrap";
@@ -70,7 +71,7 @@ function App() {
 			setApiLoaded(true);
 		} else {
 			console.log("[Google] inside the else block line 54 App.js");
-			setApiLoaded(false);
+			setApiLoaded(true);
 		}
 
 	}, []);
@@ -78,6 +79,7 @@ function App() {
 	return apiLoaded ? (
 		<Router>
 			<AuthContext.Provider value={{ token, setToken, googleId, setGoogleId }}>
+				<ErrorBoundary>
 				<Switch>
 					<Route exact path="/" component={Home} />
 					<Route exact path="/register" component={PatientRegister} />
@@ -119,6 +121,7 @@ function App() {
 						<Error />
 					</Route>
 				</Switch>
+				</ErrorBoundary>
 			</AuthContext.Provider>
 		</Router>
 	) : (

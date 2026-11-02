@@ -1,3 +1,4 @@
+import getServerUrl from "../utils/url";
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import Navbar from "../Basic/Navbar";
@@ -25,7 +26,7 @@ const AppointmentStatus = () => {
                 }
 
                 const { data } = await Axios.post(
-                    `${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/patients/upcoming-appointments/`,
+                    `${getServerUrl()}/patients/upcoming-appointments/`,
                     {
                         googleId: googleId,
                     }
