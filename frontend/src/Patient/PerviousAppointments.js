@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Axios from "axios";
-import Scrollbar from "react-scrollbars-custom";
 import { BsPencilSquare } from "react-icons/bs";
 import Navbar from "../Basic/Navbar";
 import "../Dashbaord/dashboard.css";
@@ -47,9 +46,8 @@ const PatientAppointments = () => {
               backgroundColor: "#6c757d",
             }}
           >
-            <Scrollbar
-              noScrollX
-              style={{ position: "", height: "73vh", width: "150vh" }}
+            <div
+              style={{ overflowY: "auto", overflowX: "hidden", maxHeight: "73vh", width: "100%" }}
               className="col-12 col-md-12"
             >
               <table className="table table-hover table-dark">
@@ -83,7 +81,7 @@ const PatientAppointments = () => {
                   ))}
                 </tbody>
               </table>
-            </Scrollbar>
+            </div>
           </div>
         </div>
       </div>

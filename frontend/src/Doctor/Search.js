@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Axios from "axios";
-import Scrollbar from "react-scrollbars-custom";
 // import { ListGroup, ListGroupItem } from "reactstrap";
 
 import {
@@ -118,9 +117,8 @@ const Search = () => {
       </Row>
 
       {/* <ListGroup> */}
-      <Scrollbar
-        noScrollX
-        style={{ position: "", height: "64vh", width: "144vh" }}
+      <div
+        style={{ overflowY: "auto", overflowX: "hidden", maxHeight: "64vh", width: "100%" }}
         className="col-12 col-md-12"
       >
         <div className="row">
@@ -157,7 +155,7 @@ const Search = () => {
             </div>
           ))}
         </div>
-      </Scrollbar>
+      </div>
       {/* </ListGroup> */}
     </div>
   );
