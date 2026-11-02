@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Navbar from '../Basic/Navbar';
 import { Row, Input, Button } from 'reactstrap'
 import { Link, useHistory, useParams } from 'react-router-dom';
-import StarPicker from 'react-star-picker';
+import StarPicker from '../Basic/StarPicker';
 import axios from 'axios';
 
 const Feedback = () => {

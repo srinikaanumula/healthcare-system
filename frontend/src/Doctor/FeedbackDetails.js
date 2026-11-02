@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Navbar from '../Basic/Navbar';
 import { Row, Input, Button } from 'reactstrap'
 import { Link, useParams } from 'react-router-dom';
-import StarPicker from 'react-star-picker';
+import StarPicker from '../Basic/StarPicker';
 import Spinner from "react-bootstrap/Spinner";
 import axios from 'axios';
 

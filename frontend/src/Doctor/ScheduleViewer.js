@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Axios from "axios";
 import jwt_decode from "jwt-decode";
 import { Link } from "react-router-dom";
-import StarPicker from "react-star-picker";
+import StarPicker from "../Basic/StarPicker";
 
 const ScheduleViewer = ({ initialTab = "today" }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
