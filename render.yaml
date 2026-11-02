@@ -7,10 +7,10 @@ services:
     plan: free
     buildCommand: npm install
     startCommand: node server.js
-    healthCheckPath: /doctors
+    healthCheckPath: /
     envVars:
       - key: NODE_VERSION
-        value: 18.20.4
+        value: 20.18.0
       - key: NODE_ENV
         value: dev
       - key: KEY
@@ -28,9 +28,11 @@ services:
     startCommand: node serve-build.js
     envVars:
       - key: NODE_VERSION
-        value: 18.20.4
+        value: 20.18.0
       - key: NODE_ENV
         value: production
+      - key: NODE_OPTIONS
+        value: --openssl-legacy-provider
       - key: NPM_CONFIG_LEGACY_PEER_DEPS
         value: "true"
       - key: REACT_APP_SERVER_URL
@@ -50,4 +52,4 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
-        value: 18.20.4
+        value: 20.18.0
