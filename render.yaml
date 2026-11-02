@@ -9,6 +9,8 @@ services:
     startCommand: node server.js
     healthCheckPath: /doctors
     envVars:
+      - key: NODE_VERSION
+        value: 18.20.4
       - key: NODE_ENV
         value: dev
       - key: KEY
@@ -22,11 +24,15 @@ services:
     env: node
     rootDir: frontend
     plan: free
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --legacy-peer-deps && npm run build
     startCommand: node serve-build.js
     envVars:
+      - key: NODE_VERSION
+        value: 18.20.4
       - key: NODE_ENV
         value: production
+      - key: NPM_CONFIG_LEGACY_PEER_DEPS
+        value: "true"
       - key: REACT_APP_SERVER_URL
         fromService:
           type: web
@@ -42,3 +48,6 @@ services:
     buildCommand: npm install
     startCommand: node server/server.js
     healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 18.20.4
