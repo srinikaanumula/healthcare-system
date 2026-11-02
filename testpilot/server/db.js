@@ -223,6 +223,13 @@ function getSettings() {
     }
     settings.targetAutFrontendUrl = url;
   }
+  if (process.env.AUT_BACKEND_URL) {
+    let url = process.env.AUT_BACKEND_URL.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+    settings.targetAutBackendUrl = url;
+  }
   return settings;
 }
 

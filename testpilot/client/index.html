@@ -63,11 +63,11 @@
         <!-- AUT Status Indicators & Global Actions -->
         <div class="flex items-center space-x-3">
           <div class="flex items-center space-x-2 text-xs bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
-            <span class="font-medium text-slate-600">AUT Frontend (3000):</span>
+            <span class="font-medium text-slate-600">AUT Frontend:</span>
             <span id="fe-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
             <span id="fe-status-text" class="text-slate-500">checking</span>
             <span class="text-slate-300">|</span>
-            <span class="font-medium text-slate-600">AUT Backend (5000):</span>
+            <span class="font-medium text-slate-600">AUT Backend:</span>
             <span id="be-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
             <span id="be-status-text" class="text-slate-500">checking</span>
             <button onclick="checkAutStatus()" title="Refresh AUT Status" class="text-slate-400 hover:text-slate-600 ml-1">
@@ -1554,6 +1554,7 @@ ${strategy.userTemplate
           feText.innerText = "OFFLINE";
           feText.className = "text-rose-600";
         }
+        feText.title = res.frontend.url || '';
 
         if (res.backend.online) {
           beDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
@@ -1564,6 +1565,7 @@ ${strategy.userTemplate
           beText.innerText = "OFFLINE";
           beText.className = "text-rose-600";
         }
+        beText.title = res.backend.url || '';
       } catch (e) {
         console.warn("AUT check failed:", e);
       }

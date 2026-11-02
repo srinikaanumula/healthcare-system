@@ -58,3 +58,8 @@ services:
           type: web
           name: healthcare-frontend
           property: host
+      - key: AUT_BACKEND_URL
+        fromService:
+          type: web
+          name: healthcare-backend
+          property: host

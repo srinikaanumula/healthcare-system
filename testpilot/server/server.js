@@ -302,29 +302,36 @@ app.put('/api/settings', (req, res) => {
 // Healthcare AUT Status Check
 app.get('/api/aut-status', async (req, res) => {
   const settings = db.getSettings();
-  const frontendUrl = settings.targetAutFrontendUrl || 'http://localhost:3000';
-  const backendUrl = settings.targetAutBackendUrl || 'http://localhost:5000';
+  let frontendUrl = settings.targetAutFrontendUrl || 'http://localhost:3000';
+  let backendUrl = settings.targetAutBackendUrl || 'http://localhost:5000';
 
-  const checkUrl = (target) => {
-    return new Promise((resolve) => {
-      try {
-        const u = new URL(target);
-        const request = http.request({
-          host: u.hostname,
-          port: u.port || 80,
-          path: u.pathname || '/',
-          method: 'GET',
-          timeout: 2000
-        }, (response) => {
-          resolve({ online: true, statusCode: response.statusCode });
-        });
-        request.on('error', () => resolve({ online: false, statusCode: null }));
-        request.on('timeout', () => { request.destroy(); resolve({ online: false, statusCode: null }); });
-        request.end();
-      } catch (e) {
-        resolve({ online: false, statusCode: null });
-      }
-    });
+  if ((frontendUrl.includes('localhost') || frontendUrl.includes('127.0.0.1')) && process.env.AUT_FRONTEND_URL) {
+    let envUrl = process.env.AUT_FRONTEND_URL.trim();
+    if (!envUrl.startsWith('http://') && !envUrl.startsWith('https://')) {
+      envUrl = 'https://' + envUrl;
+    }
+    frontendUrl = envUrl;
+  }
+
+  if ((backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1')) && process.env.AUT_BACKEND_URL) {
+    let envUrl = process.env.AUT_BACKEND_URL.trim();
+    if (!envUrl.startsWith('http://') && !envUrl.startsWith('https://')) {
+      envUrl = 'https://' + envUrl;
+    }
+    backendUrl = envUrl;
+  }
+
+  const checkUrl = async (target) => {
+    try {
+      const res = await fetch(target, {
+        method: 'GET',
+        headers: { 'User-Agent': 'TestPilot-Health-Check/1.0' },
+        signal: AbortSignal.timeout(4000)
+      });
+      return { online: res.status < 500, statusCode: res.status };
+    } catch (e) {
+      return { online: false, statusCode: null, error: e.message };
+    }
   };
 
   const [feStatus, beStatus] = await Promise.all([
