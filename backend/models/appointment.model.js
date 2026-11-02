@@ -20,7 +20,7 @@ const feedback = new Schema({
         type : String,
         default : ""
     }
-})
+});
 
 const appointmentSchema = new Schema({
     doctorId : {
@@ -56,6 +56,18 @@ const appointmentSchema = new Schema({
     },
     googleMeetLink : {
         type : String
+    },
+    paymentStatus : {
+        type : String,
+        default : "Pending"
+    },
+    paymentMode : {
+        type : String,
+        default : "Pay Later"
+    },
+    amount : {
+        type : Number,
+        default : 0
     },
     feedback : feedback
 });

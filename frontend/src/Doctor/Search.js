@@ -70,7 +70,7 @@ const Search = () => {
 
   const fetchDoctor = async () => {
     const { data } = await Axios.get(
-      `${process.env.REACT_APP_SERVER_URL}/doctors/`
+      `${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/doctors/`
     );
     setDoctor(data);
     console.log(data);

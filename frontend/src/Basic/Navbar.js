@@ -4,15 +4,17 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../image/navbaricon1.png";
 import { AuthContext } from "../Auth/AuthContext";
 import axios from "axios";
-// import GoogleLogin from "react-google-login";
-// import axios from "axios";
 
 const Navbar = () => {
-  const { token, setToken, setGoogleId } = useContext(AuthContext);
+  const { token, setToken, googleId, setGoogleId } = useContext(AuthContext);
   const history = useHistory();
 
   async function loginWithGoogle(e) {
     try {
+      if (!window.gapi || !window.gapi.auth2) {
+        history.push("/patient/register");
+        return;
+      }
       await window.gapi.auth2.getAuthInstance().signIn();
       const auth2 = await window.gapi.auth2.getAuthInstance();
       if (auth2.isSignedIn.get()) {
@@ -23,7 +25,7 @@ const Navbar = () => {
         window.localStorage.setItem("googleId", profile.getId());
 
         const serverRes = await axios.post(
-          `${process.env.REACT_APP_SERVER_URL}/patients/google-login/`,
+          `${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/patients/google-login/`,
           {
             tokenId: profile.getAuthResponse().id_token,
           }
@@ -40,9 +42,8 @@ const Navbar = () => {
           } else {
             history.push("/patient/update-phone");
           }
-        }
-        else {
-          const err = {err : "Server Didn't respond"}
+        } else {
+          const err = { err: "Server Didn't respond" };
           throw err;
         }
       }
@@ -52,35 +53,33 @@ const Navbar = () => {
   }
 
   function signOutGoogle() {
-    // Different logic for doctor and patient
+    window.localStorage.removeItem("token");
+    window.localStorage.removeItem("googleId");
+    window.localStorage.removeItem("user");
+    setToken(null);
+    setGoogleId(null);
 
-    // Patient logic
-    if (window.gapi.auth2.getAuthInstance().isSignedIn.get()) {
-      window.gapi.auth2.getAuthInstance().signOut().then(() => {
-        console.log("[Google] Signed out successfully!");
-        window.localStorage.removeItem("token");
-        window.localStorage.removeItem("googleId");
-        setToken(null);
-        setGoogleId(null);
-        history.push("/");
-      }).catch((err) => {
-        console.log(`[Google] Some error occurred while signing out! ${err}`);
-      });
+    try {
+      if (
+        window.gapi &&
+        window.gapi.auth2 &&
+        window.gapi.auth2.getAuthInstance() &&
+        window.gapi.auth2.getAuthInstance().isSignedIn &&
+        window.gapi.auth2.getAuthInstance().isSignedIn.get()
+      ) {
+        window.gapi.auth2.getAuthInstance().signOut().catch(() => {});
+      }
+    } catch (e) {
+      console.log("Signout notice:", e);
     }
 
-    // Doctor logic
-    else {
-      window.localStorage.removeItem("token");
-      console.log("[Doctor] Signed out successfully!");
-      setToken(null);
-      history.push("/");
-    }
+    history.push("/");
   }
 
   return (
     <nav
-      className="navbar navbar-dark bg-dark navbar-expand-lg pl-4 pr-4 w-100 "
-      style={{ backgroundColor: " #1a1a1a" }}
+      className="navbar navbar-dark bg-dark navbar-expand-lg pl-4 pr-4 w-100"
+      style={{ backgroundColor: "#1a1a1a" }}
     >
       <Link to="/" className="navbar-brand">
         <img
@@ -89,7 +88,7 @@ const Navbar = () => {
           width="30"
           height="24"
           className="d-inline-block align-top mr-2 mt-1"
-        ></img>
+        />
         Hospital Management System
       </Link>
       <button
@@ -100,32 +99,65 @@ const Navbar = () => {
       >
         <span className="navbar-toggler-icon"></span>
       </button>
-      <div className="collapse navbar-collapse " id="collapsibleNavbar">
-        <ul className="navbar-nav ml-auto text-light bg-dark">
-          <li className="navbar-item" style={{ textAlign: "right" }}>
-            <link to="/" className="nav-link " style={{ padding: 0 }} />
-            {!token && (
-              <button
-                onClick={loginWithGoogle}
-                className="btn btn-outline-primary"
-              >
-                Login As A Patient
-              </button>
-            )}
-            {token && (
-              <button
-                type="button"
-                className="btn btn-outline-primary"
-                onClick={signOutGoogle}
-              >
-                Logout
-              </button>
-            )}
-          </li>
+      <div className="collapse navbar-collapse" id="collapsibleNavbar">
+        <ul className="navbar-nav ml-auto text-light bg-dark align-items-center">
+          {!token && (
+            <>
+              <li className="nav-item mr-2 mb-2 mb-lg-0">
+                <Link to="/patient/register" className="btn btn-success font-weight-bold">
+                  Register as Patient
+                </Link>
+              </li>
+              <li className="nav-item mr-2 mb-2 mb-lg-0">
+                <Link to="/patient/register" className="btn btn-outline-info">
+                  Patient Login
+                </Link>
+              </li>
+              <li className="nav-item mr-2 mb-2 mb-lg-0">
+                <button
+                  onClick={loginWithGoogle}
+                  className="btn btn-outline-primary"
+                >
+                  Google Sign-In
+                </button>
+              </li>
+              <li className="nav-item mb-2 mb-lg-0">
+                <Link to="/doctorlogin" className="btn btn-outline-secondary">
+                  Doctor Login
+                </Link>
+              </li>
+            </>
+          )}
+          {token && (
+            <>
+              {googleId ? (
+                <li className="nav-item mr-2 mb-2 mb-lg-0">
+                  <Link to="/patient" className="btn btn-outline-light">
+                    My Dashboard
+                  </Link>
+                </li>
+              ) : (
+                <li className="nav-item mr-2 mb-2 mb-lg-0">
+                  <Link to="/doctor" className="btn btn-outline-light">
+                    Doctor Dashboard
+                  </Link>
+                </li>
+              )}
+              <li className="nav-item mb-2 mb-lg-0">
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={signOutGoogle}
+                >
+                  Logout
+                </button>
+              </li>
+            </>
+          )}
         </ul>
       </div>
     </nav>
   );
-}
+};
 
 export default Navbar;

@@ -7,15 +7,26 @@ import "../Dashbaord/dashboard.css";
 import { AuthContext } from "../Auth/AuthContext";
 
 const PersonalDetails = () => {
-  const [patient, setPatient] = useState({});
+  const [patient, setPatient] = useState(() => {
+    try {
+      return JSON.parse(window.localStorage.getItem("user")) || {};
+    } catch (e) {
+      return {};
+    }
+  });
   const [loading, setLoading] = useState(true);
   const { googleId } = useContext(AuthContext);
+  const activeGoogleId = googleId || window.localStorage.getItem("googleId");
 
   useEffect(() => {
+    if (!activeGoogleId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const getPatientDetails = async () => {
       const res = await Axios.get(
-        `${process.env.REACT_APP_SERVER_URL}/patients/getPatientDetails/${googleId}`
+        `${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/patients/getPatientDetails/${activeGoogleId}`
       );
       if (res.status === 200) {
         setPatient(res.data);
@@ -27,7 +38,7 @@ const PersonalDetails = () => {
       }
     };
     getPatientDetails();
-  }, [googleId]);
+  }, [activeGoogleId]);
 
   return (
     <div className="bg-dark" style={{ height: "100vh" }}>

@@ -1,104 +1,128 @@
-# TestPilot: Local Deployment and Quickstart Guide
+# Healthcare Application & TestPilot Deployment Guide
 
-This guide walks you through deploying both the **Reference Healthcare Application (Application Under Test - AUT)** and the **TestPilot AI Test Generation Platform**.
+This guide covers deploying both the **Healthcare System (Frontend & Backend)** and the **TestPilot AI Testing Platform** to the web so they can be accessed globally via public URLs.
 
 ---
 
-## 1. Quick Start (One-Click Launch)
+## Architecture Overview
 
-To start both the Healthcare Platform and TestPilot simultaneously, run:
+| Subsystem | Folder | Local Port | Default Role | Recommended Web Cloud Host |
+|---|---|:---:|---|---|
+| **Healthcare Backend API** | `backend/` | `5000` | Node.js Express REST API (In-Memory or MongoDB) | **Render Web Service** / **Railway** |
+| **Healthcare Frontend App** | `frontend/` | `3000` | React Patient & Doctor Portal | **Render** / **Vercel** |
+| **TestPilot Platform** | `testpilot/` | `8000` | AI Testing Lab, Review Board & Playwright Runner | **Render Web Service** / **Railway** |
 
-```cmd
-run_all.bat
+---
+
+## Method 1: Free Cloud Deployment via Render.com (Recommended)
+
+Render provides free hosting for web services and static sites directly from your GitHub repository (`https://github.com/srinikaanumula/healthcare-system.git`).
+
+We have included a pre-configured **`render.yaml`** Blueprint in the repository root that configures all 3 services automatically.
+
+### Steps to Deploy:
+1. Push your latest code changes to GitHub:
+   ```bash
+   git add .
+   git commit -m "Add web deployment configurations"
+   git push origin main
+   ```
+2. Go to [https://dashboard.render.com](https://dashboard.render.com) and sign in with your GitHub account.
+3. In the Render Dashboard, click **New +** $\rightarrow$ **Blueprint**.
+4. Connect your GitHub repository: `srinikaanumula/healthcare-system`.
+5. Render will detect `render.yaml` and display the 3 services:
+   - **`healthcare-backend`** (Web Service)
+   - **`healthcare-frontend`** (Web Service)
+   - **`testpilot-platform`** (Web Service)
+6. Click **Apply**.
+7. Once deployed, Render provides public HTTPS URLs for each service:
+   - Frontend: `https://healthcare-frontend-xxxx.onrender.com`
+   - Backend: `https://healthcare-backend-xxxx.onrender.com`
+   - TestPilot: `https://testpilot-platform-xxxx.onrender.com`
+
+---
+
+## Method 2: Deploy Frontend on Vercel + Backend on Render
+
+If you prefer deploying the React frontend on **Vercel** for optimal CDN performance:
+
+### Step 1: Deploy Backend on Render
+1. Go to [Render Dashboard](https://dashboard.render.com) $\rightarrow$ **New +** $\rightarrow$ **Web Service**.
+2. Select your repository `healthcare-system`.
+3. Set the following fields:
+   - **Root Directory**: `backend`
+   - **Build Command**: `npm install`
+   - **Start Command**: `node server.js`
+4. Click **Deploy Web Service**.
+5. Copy your live backend URL (e.g., `https://healthcare-backend.onrender.com`).
+
+### Step 2: Deploy Frontend on Vercel
+1. Go to [https://vercel.com](https://vercel.com) and sign in with GitHub.
+2. Click **Add New Project** $\rightarrow$ Import `healthcare-system`.
+3. Configure project settings:
+   - **Root Directory**: Click edit and select `frontend`.
+   - **Framework Preset**: Create React App.
+   - **Environment Variables**:
+     - Key: `REACT_APP_SERVER_URL`
+     - Value: `https://healthcare-backend.onrender.com` (Your live Render backend URL)
+4. Click **Deploy**. Vercel will provide an instant HTTPS URL (e.g., `https://healthcare-system.vercel.app`).
+
+### Step 3: Deploy TestPilot on Render
+1. In Render Dashboard $\rightarrow$ **New +** $\rightarrow$ **Web Service**.
+2. Select repository `healthcare-system`.
+   - **Root Directory**: `testpilot`
+   - **Build Command**: `npm install`
+   - **Start Command**: `node server/server.js`
+3. Click **Deploy Web Service**.
+
+---
+
+## Method 3: Instant Live Web URLs via Tunnels (No Cloud Sign-Up Needed)
+
+If you need public HTTPS URLs right away to share for a live demo, faculty review, or quick remote access without setting up cloud accounts:
+
+1. **Start all 3 services locally**:
+   ```cmd
+   run_all.bat
+   ```
+2. **Open a new terminal and generate public URLs using `localtunnel`**:
+   ```cmd
+   # Terminal 1: Public URL for Healthcare Frontend (Port 3000)
+   npx localtunnel --port 3000
+
+   # Terminal 2: Public URL for Healthcare Backend (Port 5000)
+   npx localtunnel --port 5000
+
+   # Terminal 3: Public URL for TestPilot QA Platform (Port 8000)
+   npx localtunnel --port 8000
+   ```
+3. Each command prints a public HTTPS URL (e.g. `https://neat-frog-82.loca.lt`) accessible from any phone, laptop, or evaluator's browser anywhere in the world!
+
+---
+
+## Method 4: Docker & Docker Compose (Any Cloud VPS / Server)
+
+We have provided `Dockerfile`s for each component and a root `docker-compose.yml`.
+
+### Single-Command Launch:
+```bash
+docker compose up -d --build
 ```
 
-Or start the individual subsystems:
-
-- **Start TestPilot Platform**: `start_testpilot.bat` (Opens on `http://localhost:8000`)
-- **Start Healthcare AUT**: `start_aut.bat` (Frontend on `http://localhost:3000`, Backend on `http://localhost:5000`)
-
----
-
-## 2. Port and Service Allocation
-
-| Component | Port | Description | Health Endpoint |
-|---|:---:|---|---|
-| **TestPilot Web Interface & API** | `8000` | AI Prompt Lab, Review Board, Dashboard | `http://localhost:8000/api/health` |
-| **Healthcare AUT Frontend** | `3000` | React Patient & Doctor Portal | `http://localhost:3000` |
-| **Healthcare AUT Backend** | `5000` | Express REST API (In-Memory/MongoDB) | `http://localhost:5000/doctors` |
+### Services launched:
+* `http://localhost:3000` — Healthcare Frontend
+* `http://localhost:5000` — Healthcare Backend
+* `http://localhost:8000` — TestPilot AI Platform
 
 ---
 
-## 3. Manual Step-by-Step Deployment
+## Verifying the Web Deployment
 
-### Step 1: Deploy Healthcare Backend (Port 5000)
-1. Open a terminal in `healthcare-appointment-scheduling-app`:
-   ```cmd
-   cd backend
-   node server.js
-   ```
-2. You should see:
-   ```text
-   [Notice] Using In-Memory Healthcare Data Mode (No external MongoDB Atlas required).
-   Listening on port 5000
-   ```
-   *Note: If you have an external MongoDB Atlas cluster, set `ATLAS_URI` in `backend/.env`.*
-
-### Step 2: Deploy Healthcare Frontend (Port 3000)
-1. Open a second terminal:
-   ```cmd
-   cd frontend
-   node serve-build.js
-   ```
-2. You should see:
-   ```text
-   Healthcare App Frontend RUNNING on http://localhost:3000
-   ```
-
-### Step 3: Deploy TestPilot Platform (Port 8000)
-1. Open a third terminal:
-   ```cmd
-   cd testpilot
-   npm start
-   ```
-2. You should see:
-   ```text
-   TestPilot AI Test Generation Platform is RUNNING
-   Web Interface & API: http://localhost:8000
-   ```
-3. Open your browser to **`http://localhost:8000`**.
-
----
-
-## 4. Key Verification & Test Execution Walkthrough
-
-1. **Verify Healthcare Status**:
-   - Check the top header on `http://localhost:8000`. Both `AUT Frontend (3000)` and `AUT Backend (5000)` should display green **ONLINE** indicators.
-2. **Explore 17 User Stories**:
-   - Navigate to **"1. User Stories & Scope"**. Filter by Patient, Doctor, or Admin roles.
-3. **Generate Tests with Prompt Engineering**:
-   - Click **"Generate Tests"** on any story (e.g. `US-PAT-005` or `US-DOC-002`).
-   - In **"2. Prompt Engineering Lab"**, choose your strategy: *Chain-of-Thought Healthcare QA*, *Few-Shot Schema Grounded*, or *Boundary & Edge-Case Specialist*.
-   - Adjust temperature (0.0 to 1.0) and click **"Generate Structured Test Cases"**.
-4. **Human Review & Approval**:
-   - Navigate to **"3. Human Review & Approval"**.
-   - Inspect generated test cases. Click **"Edit Steps"** to refine steps, or click **"Flag Gaps"** to record clinical audit notes.
-   - Click **"Approve"** on the test cases.
-5. **Run Automated Playwright Tests**:
-   - Navigate to **"4. Playwright Test Execution"**.
-   - Click **"Execute Approved Test Cases"**.
-   - Playwright Chromium launches headlessly, interacts with `http://localhost:3000`, evaluates assertions, and captures screenshots.
-   - Inspect pass/fail metrics and screenshot evidence.
-6. **Faculty Experiment Log**:
-   - Navigate to **"5. Prompt Experiment Log"** to inspect the 10 documented iterations with 1–5 ratings across Completeness, Accuracy, and Domain Relevance.
-   - Click **"Download Faculty Report (.md)"** to export the markdown deliverable.
-
----
-
-## 5. Reference User Credentials
-
-* **Doctor Portal (`/doctorlogin`)**:
-  - **Username**: `test`
-  - **Password**: `test`
-* **Patient Portal**:
-  - Click **"Login As A Patient"** on landing page.
+1. **Healthcare App**:
+   - Open your deployed frontend URL.
+   - Click **"Register as Patient"** or log in as a patient.
+   - Log in as doctor (`/doctorlogin`) with username `test` / `test` (or `dr_shwetha` / `password123`) to view consultation schedules.
+2. **TestPilot QA Platform**:
+   - Open your deployed TestPilot URL.
+   - In **Settings**, update the **Target AUT Frontend URL** and **Target AUT Backend URL** with your live cloud URLs.
+   - Click **"Execute Approved Test Cases"** to run automated Playwright tests against your live web app!

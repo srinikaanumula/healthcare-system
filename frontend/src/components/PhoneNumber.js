@@ -12,7 +12,7 @@ function PhoneNumber() {
 
     async function updatePhoneNumber() {
         try {
-            const res = await axios.put(`${process.env.REACT_APP_SERVER_URL}/patients/update-phone`,
+            const res = await axios.put(`${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/patients/update-phone`,
                 {
                     googleId: googleId,
                     phoneNumber: number

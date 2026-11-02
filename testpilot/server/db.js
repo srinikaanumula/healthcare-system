@@ -70,6 +70,17 @@ function getUserStoryById(id) {
   return db.userStories.find(s => s.id === id) || null;
 }
 
+function deleteUserStory(id) {
+  const db = loadDatabase();
+  const initialLength = db.userStories.length;
+  db.userStories = db.userStories.filter(s => s.id !== id);
+  if (db.userStories.length < initialLength) {
+    saveDatabase(db);
+    return true;
+  }
+  return false;
+}
+
 function createUserStory(story) {
   const db = loadDatabase();
   const newStory = {
@@ -235,6 +246,7 @@ module.exports = {
   getUserStories,
   getUserStoryById,
   createUserStory,
+  deleteUserStory,
   getTestCases,
   getTestCaseById,
   createTestCase,

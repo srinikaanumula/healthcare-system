@@ -103,7 +103,7 @@ router.route("/login").post(async (req, res) => {
 		const plainTextPassword = req.body.password;
 
 		// Password Salt for hashing purpose
-		const passwordSalt = process.env.PASSWORD_SALT;
+		const passwordSalt = process.env.PASSWORD_SALT || '';
 
 		// Encrypted password after hashing operation
 		const encryptedPassword = bcrypt.hash(plainTextPassword, passwordSalt)
@@ -122,9 +122,9 @@ router.route("/login").post(async (req, res) => {
 		// Doctor found, return the token to the client side
 		const token = jwt.sign(
 			JSON.stringify(doctor),
-			process.env.KEY, 
+			process.env.KEY || 'SECRETKEY',
 			{
-				algorithm: process.env.ALGORITHM,
+				algorithm: process.env.ALGORITHM || 'HS256',
 			}
 		);
 
@@ -187,11 +187,14 @@ router.route("/get-slots").post(async (req, res) => {
 });
 
 router.route("/book-slot").post((req, res) => {
-	const patientId = req.body.googleId; // Patient's google id
+	const patientId = req.body.googleId || req.body.patientId; // Patient's google id
 	const patientName = req.body.patientName; // Patient's name
 	const doctorId = req.body.doctorId; // Doctor's id 606460d2e0dd28cc76d9b0f3 
 	const slotId = req.body.slotId; // Id of that particular slot
 	const dateId = req.body.dateId; // Id of that particular date
+	const paymentStatus = req.body.paymentStatus || (req.body.payLater ? "Pay Later" : "Paid");
+	const paymentMode = req.body.paymentMode || (req.body.payLater ? "Pay Later (At Hospital)" : "Online Card");
+	const amount = req.body.amount || 0;
 	const meetLink = "";
 
 	Doctor.findOne({ _id: doctorId }).then((doctor) => {
@@ -213,6 +216,9 @@ router.route("/book-slot").post((req, res) => {
 					doctorEmail: doctor.email,
 					patientName: patientName,
 					googleMeetLink: meetLink,
+					paymentStatus: paymentStatus,
+					paymentMode: paymentMode,
+					amount: amount || (doctor.feesPerSession ? doctor.feesPerSession * 1.18 : 0),
 					feedback: new Feedback()
 				});
 
@@ -335,6 +341,56 @@ router.route('/previous-appointments').post(async (req, res) => {
 		console.log(err);
 		res.status(400).json(err);
 	}
-})
+});
+
+// Doctor future / upcoming appointments
+router.route('/future-appointments').post(async (req, res) => {
+	try {
+		const doctorId = req.body.doctorId;
+		const appointments = await Appointment.find({ doctorId: doctorId });
+
+		const now = new Date();
+		let currDate = now.getFullYear().toString();
+		const month = now.getMonth() + 1;
+		const day = now.getDate();
+		currDate += month < 10 ? ('-0' + month.toString()) : '-' + month.toString();
+		currDate += day < 10 ? ('-0' + day.toString()) : '-' + day.toString();
+
+		const filtered = appointments.filter((appointment) => {
+			if (!appointment.date) return false;
+			const appDate = appointment.date.trim();
+			if (appDate > currDate) return true;
+			if (appDate === currDate && appointment.slotTime) {
+				const appDateTime = Date.parse(appointment.date + 'T' + appointment.slotTime);
+				return appDateTime > now.getTime();
+			}
+			return false;
+		});
+
+		const sorted = filtered.sort((a, b) => {
+			return Date.parse(a.date + 'T' + a.slotTime) - Date.parse(b.date + 'T' + b.slotTime);
+		});
+
+		res.status(200).json(sorted);
+	} catch (err) {
+		console.log(err);
+		res.status(400).json(err);
+	}
+});
+
+// Doctor all appointments (unified schedule)
+router.route('/all-appointments').post(async (req, res) => {
+	try {
+		const doctorId = req.body.doctorId;
+		const appointments = await Appointment.find({ doctorId: doctorId });
+		const sorted = appointments.sort((a, b) => {
+			return Date.parse(b.date + 'T' + b.slotTime) - Date.parse(a.date + 'T' + a.slotTime);
+		});
+		res.status(200).json(sorted);
+	} catch (err) {
+		console.log(err);
+		res.status(400).json(err);
+	}
+});
 
 module.exports = router;

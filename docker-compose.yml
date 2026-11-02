@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: healthcare-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=dev
+      - KEY=SECRETKEY
+      - ALGORITHM=HS256
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: healthcare-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - REACT_APP_SERVER_URL=http://localhost:5000
+    depends_on:
+      - backend
+
+  testpilot:
+    build:
+      context: ./testpilot
+      dockerfile: Dockerfile
+    container_name: testpilot-platform
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    depends_on:
+      - frontend
+      - backend

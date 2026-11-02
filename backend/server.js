@@ -5,7 +5,13 @@ const mongoose = require('mongoose');
 const patientsRouter = require('./routes/patients');
 const doctorsRotuer = require('./routes/doctors');
 const appointmentRouter = require('./routes/appointments');
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, 'app.env') });
 require('dotenv').config();
+
+process.env.KEY = process.env.KEY || 'SECRETKEY';
+process.env.ALGORITHM = process.env.ALGORITHM || 'HS256';
+process.env.PASSWORD_SALT = process.env.PASSWORD_SALT || '';
  
 app.use(express.json());
 app.use(cors(
@@ -27,9 +33,15 @@ if (uri && uri.trim().length > 0) {
     app.use('/doctors', doctorsRotuer);
     app.use('/appointments', appointmentRouter);
 
-    mongoose.connect(uri, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true, useFindAndModify: false }, (err) => {
+    mongoose.connect(uri, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true, useFindAndModify: false }, async (err) => {
         if (!err) {
             console.log("Connection to MongoDB database successful!");
+            try {
+                const { autoSeedDoctors } = require('./seedDoctors');
+                await autoSeedDoctors();
+            } catch (seedErr) {
+                console.log("Doctor auto-seed note:", seedErr.message);
+            }
         } else {
             console.log("MongoDB connection error:", err.message);
         }
@@ -40,27 +52,28 @@ if (uri && uri.trim().length > 0) {
 }
 
 function getCurrentTime() {
-    const date = new Date()
-    console.log(date)
+    const date = new Date();
+    console.log(date);
 }
 
 function getEndDateTime(dateTime) {
-    // 2021-03-22T09:00:00
-    const hrs = (parseInt(dateTime.split('T')[1].split(':')[0]) + 1).toString().padStart(2, '0')
-    const time = hrs + ':00:00'
-    const date = dateTime.split('T')[0]
-    return date + 'T' + time
+    const hrs = (parseInt(dateTime.split('T')[1].split(':')[0]) + 1).toString().padStart(2, '0');
+    const time = hrs + ':00:00';
+    const date = dateTime.split('T')[0];
+    return date + 'T' + time;
 }
-
-app.listen(port, () => {
-    console.log(`Listening on port ${port}`)
-    console.log(`NODE_ENV = ${process.env.NODE_ENV}`)
-    getCurrentTime()
-    getEndDateTime("2021-03-22T09:00:00")
-})
 
 app.get('/', (req, res) => {
     res.status(200).json("Hello");
-})
+});
+
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(port, () => {
+        console.log(`Listening on port ${port}`);
+        console.log(`NODE_ENV = ${process.env.NODE_ENV}`);
+        getCurrentTime();
+        getEndDateTime("2021-03-22T09:00:00");
+    });
+}
 
 module.exports = app;

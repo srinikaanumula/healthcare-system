@@ -14,7 +14,7 @@ const LoginForm = () => {
 	async function login() {
 		try {
 			const res = await axios.post(
-				`${process.env.REACT_APP_SERVER_URL}/doctors/login/`,
+				`${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/doctors/login/`,
 				{
 					username: username,
 					password: password

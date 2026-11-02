@@ -1,4 +1,4 @@
-/* global gapi */
+
 import React, { useEffect, useState } from "react";
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
@@ -24,6 +24,8 @@ import DocAppointments from "./Doctor/PaymentHistory";
 import AppointmentStatus from "./Patient/AppointmentStatus";
 import Pfeedback from './Patient/Feedback';
 import FeedbackDetails from './Doctor/FeedbackDetails';
+import FutureSchedule from "./Doctor/FutureSchedule";
+import PatientRegister from './Pages/PatientRegister';
 
 function App() {
 	const [token, setToken] = useState(window.localStorage.getItem("token"));
@@ -78,6 +80,8 @@ function App() {
 			<AuthContext.Provider value={{ token, setToken, googleId, setGoogleId }}>
 				<Switch>
 					<Route exact path="/" component={Home} />
+					<Route exact path="/register" component={PatientRegister} />
+					<Route exact path="/patient/register" component={PatientRegister} />
 					<Route exact path="/doctorlogin" component={DoctorLogin} />
 					<Route exact path="/doctor" component={DoctorDashboard} />
 					<Route exact path="/patient/searchdoctor" component={SearchDoctor} />
@@ -92,6 +96,11 @@ function App() {
 						exact
 						path="/doctor/perosnaldetails"
 						component={PersonalDetails}
+					/>
+					<Route
+						exact
+						path="/doctor/future-schedules"
+						component={FutureSchedule}
 					/>
 					<Route
 						exact

@@ -33,6 +33,100 @@ router.route('/add').post((req, res) => {
     })
 })
 
+// Patient Registration
+router.route('/register').post(async (req, res) => {
+    try {
+        const { name, email, phoneNumber, password } = req.body;
+        let { googleId } = req.body;
+
+        if (!name || !email) {
+            return res.status(400).json({ message: "Name and email are required" });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+        if (!googleId) {
+            googleId = normalizedEmail;
+        }
+
+        let existingPatient = await Patient.findOne({
+            $or: [{ googleId: googleId }, { email: normalizedEmail }]
+        });
+
+        if (existingPatient) {
+            return res.status(400).json({ message: "A patient with this email already exists" });
+        }
+
+        const newPatient = new Patient({
+            googleId,
+            email: normalizedEmail,
+            name: name.trim(),
+            phoneNumber: (phoneNumber || '').trim(),
+            password: password || '',
+            picture: req.body.picture || 'https://via.placeholder.com/150',
+            isVerified: true
+        });
+
+        const savedPatient = await newPatient.save();
+        const jwtSecret = process.env.KEY || 'SECRETKEY';
+        const token = jwt.sign(
+            { googleId: savedPatient.googleId, email: savedPatient.email, name: savedPatient.name },
+            jwtSecret,
+            { algorithm: process.env.ALGORITHM || 'HS256' }
+        );
+
+        return res.status(201).json({
+            message: "Patient registered successfully!",
+            token,
+            googleId: savedPatient.googleId,
+            patient: savedPatient,
+            phoneNumberExists: Boolean(savedPatient.phoneNumber)
+        });
+    } catch (err) {
+        console.error("Registration error:", err);
+        return res.status(500).json({ message: "Registration failed: " + (err.message || err) });
+    }
+});
+
+// Patient direct login (email + password)
+router.route('/login').post(async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+
+        const normalizedEmail = email.toLowerCase().trim();
+        const patient = await Patient.findOne({
+            $or: [{ email: normalizedEmail }, { googleId: normalizedEmail }]
+        });
+
+        if (!patient) {
+            return res.status(404).json({ message: "Patient account not found. Please register." });
+        }
+
+        if (patient.password && password && patient.password !== password) {
+            return res.status(401).json({ message: "Invalid email or password" });
+        }
+
+        const jwtSecret = process.env.KEY || 'SECRETKEY';
+        const token = jwt.sign(
+            { googleId: patient.googleId, email: patient.email, name: patient.name },
+            jwtSecret,
+            { algorithm: process.env.ALGORITHM || 'HS256' }
+        );
+
+        return res.status(200).json({
+            token,
+            googleId: patient.googleId,
+            patient,
+            phoneNumberExists: Boolean(patient.phoneNumber)
+        });
+    } catch (err) {
+        console.error("Patient login error:", err);
+        return res.status(500).json({ message: "Login failed: " + (err.message || err) });
+    }
+});
+
 // To update a patient's phone number
 router.route('/update-phone').put((req, res) => {
     const googleId = req.body.googleId;
@@ -53,17 +147,22 @@ router.route('/update-phone').put((req, res) => {
 router.route('/google-login').post(async (req, res) => {
     try {
         const tokenId = req.body.tokenId;
+        const jwtSecret = process.env.KEY || 'SECRETKEY';
 
         // Decode the jwt
-        const decoded = jwt.decode(tokenId, process.env.KEY);
-        const googleId = await decoded.sub;
+        const decoded = tokenId ? jwt.decode(tokenId, jwtSecret) : null;
+        const googleId = decoded && (decoded.sub || decoded.googleId || decoded.email);
+
+        if (!googleId) {
+            return res.status(400).json({ message: 'Invalid Google token' });
+        }
 
         // Check if the user already exists in the database
-        const patient = await Patient.findOne({ googleId: googleId });
+        let patient = await Patient.findOne({ googleId: googleId });
 
         // If the patient is not found
         if (patient === null) {
-            const { email, name, picture } = decoded;
+            const { email, name, picture } = decoded || {};
             const newPatient = new Patient({
                 googleId, email, name, picture
             })
@@ -77,7 +176,7 @@ router.route('/google-login').post(async (req, res) => {
         }
 
         // If the phone number is not present in the database
-        else if (patient.phoneNumber === undefined) {
+        else if (!patient.phoneNumber) {
             return res.status(200).json({ phoneNumberExists: false });
         }
 
@@ -95,7 +194,9 @@ router.route('/google-login').post(async (req, res) => {
 router.route('/getPatientDetails/:googleId').get(async (req, res) => {
     try {
         const googleId = req.params.googleId;
-        const patient = await Patient.findOne({ googleId: googleId });
+        const patient = await Patient.findOne({
+            $or: [{ googleId: googleId }, { email: googleId.toLowerCase() }]
+        });
 
         if (patient) {
             return res.status(200).json(patient);

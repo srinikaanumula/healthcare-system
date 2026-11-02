@@ -13,22 +13,20 @@ const LeftsideDoctor = () => {
           </Link>
         </li>
         <li style={{ textDecoration: "none" }}>
+          <Link to="/doctor/future-schedules">
+            <Option Value="Future Schedules" />
+          </Link>
+        </li>
+        <li style={{ textDecoration: "none" }}>
+          <Link to="/doctor/payment-history">
+            <Option Value="Previous Schedules" />
+          </Link>
+        </li>
+        <li style={{ textDecoration: "none" }}>
           <Link to="/doctor/perosnaldetails">
             <Option Value="Personal Details" />
           </Link>
         </li>
-
-        <li style={{ textDecoration: "none" }}>
-          <Link to="/doctor/payment-history">
-            <Option Value="Previous Appointments" />
-          </Link>
-        </li>
-
-        {/* <li style={{ textDecoration: "none" }}>
-          <Link to="/doctor/feedback">
-            <Option Value="Feedback" />
-          </Link>
-        </li> */}
       </ul>
     </div>
   );

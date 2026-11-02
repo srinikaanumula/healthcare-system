@@ -1,8 +1,8 @@
 ## healthcare-appointment-scheduling-app
 
-**Frontend**- https://healthcarebooking.netlify.app/
+**Frontend** - http://localhost:3000
 
-**Backend** - https://healthcare-appointment-scheduling-app.onrender.com
+**Backend** - http://localhost:5000
 
 ## Patient Guide: 
 

@@ -19,6 +19,13 @@ const patientSchema = new Schema({
     },
     phoneNumber: {
         type: String
+    },
+    password: {
+        type: String
+    },
+    isVerified: {
+        type: Boolean,
+        default: true
     }
 });
 

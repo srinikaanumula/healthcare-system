@@ -20,7 +20,7 @@ const Feedback = () => {
 	const putFeedback = async () => {
 		try {
 			const { data } = axios.put(
-				`${process.env.REACT_APP_SERVER_URL}/appointments/feedback/`,
+				`${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/appointments/feedback/`,
 				{
 					appointmentId: appointmentId.id,
 					stars: rating,

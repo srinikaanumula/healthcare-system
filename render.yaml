@@ -1,0 +1,44 @@
+services:
+  # 1. Healthcare Backend REST API
+  - type: web
+    name: healthcare-backend
+    env: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /doctors
+    envVars:
+      - key: NODE_ENV
+        value: dev
+      - key: KEY
+        value: SECRETKEY
+      - key: ALGORITHM
+        value: HS256
+
+  # 2. Healthcare Frontend Web Portal
+  - type: web
+    name: healthcare-frontend
+    env: node
+    rootDir: frontend
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: node serve-build.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: REACT_APP_SERVER_URL
+        fromService:
+          type: web
+          name: healthcare-backend
+          property: host
+
+  # 3. TestPilot AI Testing Platform
+  - type: web
+    name: testpilot-platform
+    env: node
+    rootDir: testpilot
+    plan: free
+    buildCommand: npm install
+    startCommand: node server/server.js
+    healthCheckPath: /api/health

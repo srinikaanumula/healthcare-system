@@ -7,7 +7,7 @@ const { generateTestCases, PROMPT_STRATEGIES } = require('./llmEngine');
 const { executeSingleTestCase, executeBatchTestCases } = require('./testRunner');
 
 const app = express();
-const PORT = process.env.TESTPILOT_PORT || 8000;
+const PORT = process.env.PORT || process.env.TESTPILOT_PORT || 8000;
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -42,6 +42,16 @@ app.get('/api/user-stories/:id', (req, res) => {
   const story = db.getUserStoryById(req.params.id);
   if (!story) return res.status(404).json({ error: 'User story not found' });
   res.json(story);
+});
+
+app.delete('/api/user-stories/:id', (req, res) => {
+  try {
+    const success = db.deleteUserStory(req.params.id);
+    if (!success) return res.status(404).json({ error: 'User story not found' });
+    res.json({ message: 'User story deleted successfully' });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
 app.post('/api/user-stories', (req, res) => {
@@ -230,9 +240,19 @@ app.post('/api/execute', async (req, res) => {
     const settings = db.getSettings();
     const url = targetUrl || settings.targetAutFrontendUrl || 'http://localhost:3000';
 
+    let ids = [];
+    if (Array.isArray(testCaseIds)) {
+      ids = testCaseIds;
+    } else if (typeof testCaseIds === 'string' && testCaseIds.trim()) {
+      ids = [testCaseIds.trim()];
+    }
+
     let casesToRun = [];
-    if (Array.isArray(testCaseIds) && testCaseIds.length > 0) {
-      casesToRun = testCaseIds.map(id => db.getTestCaseById(id)).filter(Boolean);
+    if (ids.length > 0) {
+      casesToRun = ids.map(id => db.getTestCaseById(id)).filter(Boolean);
+      if (casesToRun.length === 0) {
+        return res.status(404).json({ error: `No test cases found matching IDs: ${ids.join(', ')}` });
+      }
     } else {
       // Default: run all approved cases
       casesToRun = db.getTestCases({ status: 'approved' });

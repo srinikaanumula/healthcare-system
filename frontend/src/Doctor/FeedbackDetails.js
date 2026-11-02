@@ -15,7 +15,7 @@ const FeedbackDetails = () => {
 		async function init() {
 			setIsLoading(true);
 			const { data } = await axios.get(
-				`${process.env.REACT_APP_SERVER_URL}/doctors/appointment/${id}`
+				`${process.env.REACT_APP_SERVER_URL || 'http://localhost:5000'}/doctors/appointment/${id}`
 			);
 			
 			setFeedback(data?.feedback);
@@ -24,6 +24,7 @@ const FeedbackDetails = () => {
 		}
 
 		init();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 
 	if (isLoading) {
