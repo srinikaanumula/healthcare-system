@@ -238,7 +238,14 @@ app.post('/api/execute', async (req, res) => {
   try {
     const { testCaseIds, targetUrl } = req.body;
     const settings = db.getSettings();
-    const url = targetUrl || settings.targetAutFrontendUrl || 'http://localhost:3000';
+    let url = targetUrl || settings.targetAutFrontendUrl || 'http://localhost:3000';
+    if ((url.includes('localhost') || url.includes('127.0.0.1')) && process.env.AUT_FRONTEND_URL) {
+      let envUrl = process.env.AUT_FRONTEND_URL.trim();
+      if (!envUrl.startsWith('http://') && !envUrl.startsWith('https://')) {
+        envUrl = 'https://' + envUrl;
+      }
+      url = envUrl;
+    }
 
     let ids = [];
     if (Array.isArray(testCaseIds)) {

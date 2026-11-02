@@ -1575,6 +1575,9 @@ ${strategy.userTemplate
       if (document.getElementById('setting-provider')) document.getElementById('setting-provider').value = s.provider || 'builtin';
       if (document.getElementById('setting-openai-key')) document.getElementById('setting-openai-key').value = s.openaiKey || '';
       if (document.getElementById('setting-fe-url')) document.getElementById('setting-fe-url').value = s.targetAutFrontendUrl || 'http://localhost:3000';
+      if (document.getElementById('run-target-url') && s.targetAutFrontendUrl) {
+        document.getElementById('run-target-url').value = s.targetAutFrontendUrl;
+      }
       if (document.getElementById('setting-be-url')) document.getElementById('setting-be-url').value = s.targetAutBackendUrl || 'http://localhost:5000';
       if (document.getElementById('setting-headless')) document.getElementById('setting-headless').checked = s.headless !== false;
     }

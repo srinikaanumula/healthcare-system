@@ -47,9 +47,14 @@ services:
     env: node
     rootDir: testpilot
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npx playwright install chromium
     startCommand: node server/server.js
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: 20.18.0
+      - key: AUT_FRONTEND_URL
+        fromService:
+          type: web
+          name: healthcare-frontend
+          property: host

@@ -215,7 +215,15 @@ function updateExecutionRun(id, updates) {
 // Settings
 function getSettings() {
   const db = loadDatabase();
-  return db.settings;
+  const settings = { ...db.settings };
+  if (process.env.AUT_FRONTEND_URL) {
+    let url = process.env.AUT_FRONTEND_URL.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+    settings.targetAutFrontendUrl = url;
+  }
+  return settings;
 }
 
 function updateSettings(updates) {
