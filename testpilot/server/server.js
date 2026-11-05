@@ -299,38 +299,34 @@ app.put('/api/settings', (req, res) => {
   res.json(updated);
 });
 
+function sanitizeAutUrl(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string') return '';
+  let url = rawUrl.trim();
+  if (!url) return '';
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = 'https://' + url;
+  }
+  return url.replace(/\/+$/, '');
+}
+
 // Healthcare AUT Status Check
 app.get('/api/aut-status', async (req, res) => {
   const settings = db.getSettings();
-  let frontendUrl = settings.targetAutFrontendUrl || 'http://localhost:3000';
-  let backendUrl = settings.targetAutBackendUrl || 'http://localhost:5000';
-
-  if ((frontendUrl.includes('localhost') || frontendUrl.includes('127.0.0.1')) && process.env.AUT_FRONTEND_URL) {
-    let envUrl = process.env.AUT_FRONTEND_URL.trim();
-    if (!envUrl.startsWith('http://') && !envUrl.startsWith('https://')) {
-      envUrl = 'https://' + envUrl;
-    }
-    frontendUrl = envUrl;
-  }
-
-  if ((backendUrl.includes('localhost') || backendUrl.includes('127.0.0.1')) && process.env.AUT_BACKEND_URL) {
-    let envUrl = process.env.AUT_BACKEND_URL.trim();
-    if (!envUrl.startsWith('http://') && !envUrl.startsWith('https://')) {
-      envUrl = 'https://' + envUrl;
-    }
-    backendUrl = envUrl;
-  }
+  const frontendUrl = sanitizeAutUrl(settings.targetAutFrontendUrl) || 'http://localhost:3000';
+  const backendUrl = sanitizeAutUrl(settings.targetAutBackendUrl) || 'http://localhost:5000';
 
   const checkUrl = async (target) => {
+    if (!target) return { online: false, statusCode: null, error: 'No URL configured' };
+    const cleanUrl = sanitizeAutUrl(target);
     try {
-      const res = await fetch(target, {
+      const res = await fetch(cleanUrl, {
         method: 'GET',
         headers: { 'User-Agent': 'TestPilot-Health-Check/1.0' },
-        signal: AbortSignal.timeout(4000)
+        signal: AbortSignal.timeout(15000) // 15s to allow waking Render cold starts
       });
-      return { online: res.status < 500, statusCode: res.status };
+      return { online: res.status < 500, statusCode: res.status, url: cleanUrl };
     } catch (e) {
-      return { online: false, statusCode: null, error: e.message };
+      return { online: false, statusCode: null, error: e.message, url: cleanUrl };
     }
   };
 

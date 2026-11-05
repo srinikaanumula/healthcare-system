@@ -212,24 +212,46 @@ function updateExecutionRun(id, updates) {
   return db.executionRuns[index];
 }
 
+function sanitizeUrl(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string') return '';
+  let url = rawUrl.trim();
+  if (!url) return '';
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    url = 'https://' + url;
+  }
+  return url.replace(/\/+$/, '');
+}
+
 // Settings
 function getSettings() {
   const db = loadDatabase();
   const settings = { ...db.settings };
-  if (process.env.AUT_FRONTEND_URL) {
-    let url = process.env.AUT_FRONTEND_URL.trim();
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = 'https://' + url;
-    }
-    settings.targetAutFrontendUrl = url;
+
+  // If user configured a valid custom non-localhost URL, respect and sanitize it
+  const hasUserCustomFe = settings.targetAutFrontendUrl &&
+    !settings.targetAutFrontendUrl.includes('localhost') &&
+    !settings.targetAutFrontendUrl.includes('127.0.0.1');
+
+  if (hasUserCustomFe) {
+    settings.targetAutFrontendUrl = sanitizeUrl(settings.targetAutFrontendUrl);
+  } else if (process.env.AUT_FRONTEND_URL) {
+    settings.targetAutFrontendUrl = sanitizeUrl(process.env.AUT_FRONTEND_URL);
+  } else {
+    settings.targetAutFrontendUrl = sanitizeUrl(settings.targetAutFrontendUrl) || 'http://localhost:3000';
   }
-  if (process.env.AUT_BACKEND_URL) {
-    let url = process.env.AUT_BACKEND_URL.trim();
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      url = 'https://' + url;
-    }
-    settings.targetAutBackendUrl = url;
+
+  const hasUserCustomBe = settings.targetAutBackendUrl &&
+    !settings.targetAutBackendUrl.includes('localhost') &&
+    !settings.targetAutBackendUrl.includes('127.0.0.1');
+
+  if (hasUserCustomBe) {
+    settings.targetAutBackendUrl = sanitizeUrl(settings.targetAutBackendUrl);
+  } else if (process.env.AUT_BACKEND_URL) {
+    settings.targetAutBackendUrl = sanitizeUrl(process.env.AUT_BACKEND_URL);
+  } else {
+    settings.targetAutBackendUrl = sanitizeUrl(settings.targetAutBackendUrl) || 'http://localhost:5000';
   }
+
   return settings;
 }
 

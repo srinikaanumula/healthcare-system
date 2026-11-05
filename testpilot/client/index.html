@@ -1538,36 +1538,44 @@ ${strategy.userTemplate
 
     // AUT Status Checker
     async function checkAutStatus() {
+      const feDot = document.getElementById('fe-status-dot');
+      const feText = document.getElementById('fe-status-text');
+      const beDot = document.getElementById('be-status-dot');
+      const beText = document.getElementById('be-status-text');
+
+      if (feDot) feDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse";
+      if (feText) { feText.innerText = "checking..."; feText.className = "text-slate-500"; }
+      if (beDot) beDot.className = "w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse";
+      if (beText) { beText.innerText = "checking..."; beText.className = "text-slate-500"; }
+
       try {
         const res = await fetch('/api/aut-status').then(r => r.json());
-        const feDot = document.getElementById('fe-status-dot');
-        const feText = document.getElementById('fe-status-text');
-        const beDot = document.getElementById('be-status-dot');
-        const beText = document.getElementById('be-status-text');
 
-        if (res.frontend.online) {
+        if (res.frontend && res.frontend.online) {
           feDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
           feText.innerText = "ONLINE";
           feText.className = "text-emerald-700 font-bold";
         } else {
           feDot.className = "w-2.5 h-2.5 rounded-full bg-rose-400";
           feText.innerText = "OFFLINE";
-          feText.className = "text-rose-600";
+          feText.className = "text-rose-600 font-semibold";
         }
-        feText.title = res.frontend.url || '';
+        feText.title = `URL: ${res.frontend?.url || 'N/A'}\nStatus: ${res.frontend?.statusCode || 'Failed'}\n${res.frontend?.error ? 'Detail: ' + res.frontend.error : ''}`;
 
-        if (res.backend.online) {
+        if (res.backend && res.backend.online) {
           beDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
           beText.innerText = "ONLINE";
           beText.className = "text-emerald-700 font-bold";
         } else {
           beDot.className = "w-2.5 h-2.5 rounded-full bg-rose-400";
           beText.innerText = "OFFLINE";
-          beText.className = "text-rose-600";
+          beText.className = "text-rose-600 font-semibold";
         }
-        beText.title = res.backend.url || '';
+        beText.title = `URL: ${res.backend?.url || 'N/A'}\nStatus: ${res.backend?.statusCode || 'Failed'}\n${res.backend?.error ? 'Detail: ' + res.backend.error : ''}`;
       } catch (e) {
         console.warn("AUT check failed:", e);
+        if (feText) feText.innerText = "ERROR";
+        if (beText) beText.innerText = "ERROR";
       }
     }
 
@@ -1600,9 +1608,13 @@ ${strategy.userTemplate
           body: JSON.stringify(payload)
         });
         state.settings = await res.json();
+        if (document.getElementById('run-target-url') && state.settings.targetAutFrontendUrl) {
+          document.getElementById('run-target-url').value = state.settings.targetAutFrontendUrl;
+        }
         const msg = document.getElementById('settings-saved-msg');
         msg.classList.remove('hidden');
         setTimeout(() => msg.classList.add('hidden'), 3000);
+        checkAutStatus();
       } catch (err) {
         alert(err.message);
       }
