@@ -269,33 +269,95 @@
     <!-- TAB 3: HUMAN REVIEW & APPROVAL BOARD       -->
     <!-- ========================================== -->
     <div id="tab-review-board" class="tab-content hidden space-y-6">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-        <div>
-          <h2 class="text-xl font-bold text-slate-900">Human Review & Approval Interface</h2>
-          <p class="text-sm text-slate-500 mt-1">QA engineers critically inspect, edit test steps, flag coverage gaps, add missing edge cases, and approve test cases before execution.</p>
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center space-x-3">
+              <h2 class="text-xl font-bold text-slate-900">Human Review & Approval Interface</h2>
+              <span id="review-metrics-badge" class="text-xs bg-teal-50 text-teal-700 font-semibold px-2.5 py-1 rounded-full border border-teal-200">
+                Loading...
+              </span>
+            </div>
+            <p class="text-sm text-slate-500 mt-1">QA engineers critically inspect, edit test steps, flag coverage gaps, add missing edge cases, and approve test cases categorized by User Story.</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="btn-toggle-grouping" onclick="toggleStoryGrouping()" class="text-xs bg-teal-50 text-teal-800 font-medium px-3 py-2 rounded-lg border border-teal-300 transition flex items-center space-x-1.5 shadow-xs" title="Toggle between Categorized by User Story and Flat View">
+              <i data-lucide="layers" class="w-3.5 h-3.5 text-teal-600"></i>
+              <span id="label-toggle-grouping">Categorized by Story</span>
+            </button>
+            <button id="btn-toggle-all-accordions" onclick="toggleAllStorySections()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-3 py-2 rounded-lg border border-slate-200 transition flex items-center space-x-1.5" title="Collapse or Expand all story sections">
+              <i data-lucide="chevrons-up-down" class="w-3.5 h-3.5"></i>
+              <span id="label-toggle-all-accordions">Collapse All</span>
+            </button>
+            <button onclick="batchApproveAll()" class="text-xs bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition flex items-center space-x-1.5">
+              <i data-lucide="check-check" class="w-3.5 h-3.5"></i>
+              <span>Approve All</span>
+            </button>
+          </div>
         </div>
-        <div class="flex items-center space-x-3">
-          <select id="filter-review-status" onchange="renderReviewBoard()" class="text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-700">
-            <option value="all">All Statuses</option>
-            <option value="pending_review">Pending Review</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="edited">Edited</option>
-          </select>
-          <select id="filter-review-type" onchange="renderReviewBoard()" class="text-sm bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-700">
-            <option value="all">All Scenarios</option>
-            <option value="positive">Positive (Happy Path)</option>
-            <option value="negative">Negative (Validation/Auth)</option>
-            <option value="edge_case">Edge Case (Concurrency/Boundary)</option>
-          </select>
-          <button onclick="batchApproveAll()" class="text-sm bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition">
-            Approve All
-          </button>
+
+        <!-- Filter & Sorting Controls Toolbar -->
+        <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="flex flex-wrap items-center gap-3">
+            <!-- Filter by User Story -->
+            <div class="flex items-center space-x-1.5">
+              <label class="font-semibold text-slate-600 flex items-center space-x-1">
+                <i data-lucide="bookmark" class="w-3.5 h-3.5 text-teal-600"></i>
+                <span>User Story:</span>
+              </label>
+              <select id="filter-review-story" onchange="renderReviewBoard()" class="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium max-w-[260px] truncate focus:ring-1 focus:ring-teal-500">
+                <option value="all">All User Stories</option>
+              </select>
+            </div>
+
+            <!-- Sort By User Story ID / Test Case ID -->
+            <div class="flex items-center space-x-1.5">
+              <label class="font-semibold text-slate-600 flex items-center space-x-1">
+                <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-slate-500"></i>
+                <span>Sort By:</span>
+              </label>
+              <select id="sort-review-order" onchange="renderReviewBoard()" class="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:ring-1 focus:ring-teal-500">
+                <option value="story-asc">Story ID (A → Z)</option>
+                <option value="story-desc">Story ID (Z → A)</option>
+                <option value="tc-asc">Test Case ID (Asc)</option>
+                <option value="tc-desc">Test Case ID (Desc)</option>
+                <option value="priority">Priority (High → Low)</option>
+                <option value="status">Status (Pending First)</option>
+              </select>
+            </div>
+
+            <!-- Filter Status -->
+            <div class="flex items-center space-x-1.5">
+              <label class="font-semibold text-slate-600">Status:</label>
+              <select id="filter-review-status" onchange="renderReviewBoard()" class="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:ring-1 focus:ring-teal-500">
+                <option value="all">All Statuses</option>
+                <option value="pending_review">Pending Review</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="edited">Edited</option>
+              </select>
+            </div>
+
+            <!-- Filter Scenario -->
+            <div class="flex items-center space-x-1.5">
+              <label class="font-semibold text-slate-600">Scenario:</label>
+              <select id="filter-review-type" onchange="renderReviewBoard()" class="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:ring-1 focus:ring-teal-500">
+                <option value="all">All Scenarios</option>
+                <option value="positive">Positive (Happy Path)</option>
+                <option value="negative">Negative (Validation/Auth)</option>
+                <option value="edge_case">Edge Case (Concurrency/Boundary)</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="review-filter-summary" class="text-slate-400 text-xs italic">
+            <!-- Dynamically populated -->
+          </div>
         </div>
       </div>
 
       <!-- Test Cases Review Table / Cards -->
-      <div id="review-cards-list" class="space-y-4">
+      <div id="review-cards-list" class="space-y-5">
         <!-- Populated via JavaScript -->
       </div>
     </div>
@@ -695,6 +757,10 @@
       strategies: {}
     };
 
+    // Review board view state
+    let isReviewGroupedByStory = true;
+    let collapsedStoryGroups = new Set();
+
     // Initialization
     document.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
@@ -723,6 +789,7 @@
 
         renderUserStories();
         populateLabDropdowns();
+        populateReviewStoryDropdown();
         renderReviewBoard();
         populateExecutionCaseDropdown();
         renderExecutionDashboard();
@@ -878,6 +945,7 @@
 
         renderUserStories();
         populateLabDropdowns();
+        populateReviewStoryDropdown();
         updateHeaderBadges();
 
         // Select newly created story in Prompt Lab
@@ -910,6 +978,7 @@
 
         renderUserStories();
         populateLabDropdowns();
+        populateReviewStoryDropdown();
         updateHeaderBadges();
       } catch (err) {
         alert('Failed to delete user story: ' + err.message);
@@ -1017,6 +1086,7 @@ ${strategy.userTemplate
           // Refresh test cases list & badges
           state.testCases = await fetch('/api/test-cases').then(r => r.json());
           state.experiments = await fetch('/api/experiments').then(r => r.json());
+          populateReviewStoryDropdown();
           renderReviewBoard();
           renderExperimentTable();
           updateHeaderBadges();
@@ -1028,27 +1098,159 @@ ${strategy.userTemplate
       }
     }
 
-    // Review Board Renderer
-    function renderReviewBoard() {
-      const filterStatus = document.getElementById('filter-review-status')?.value || 'all';
-      const filterType = document.getElementById('filter-review-type')?.value || 'all';
-      const container = document.getElementById('review-cards-list');
-      if (!container) return;
+    // ==========================================
+    // REVIEW BOARD CONTROLS & GROUPING LOGIC
+    // ==========================================
 
-      let list = state.testCases;
-      if (filterStatus !== 'all') list = list.filter(tc => tc.status === filterStatus);
-      if (filterType !== 'all') list = list.filter(tc => tc.scenarioType === filterType);
+    function populateReviewStoryDropdown() {
+      const select = document.getElementById('filter-review-story');
+      if (!select) return;
 
-      if (list.length === 0) {
-        container.innerHTML = `<div class="bg-white p-8 rounded-2xl text-center text-slate-400 border border-slate-200">No test cases matching current filters.</div>`;
+      const currentVal = select.value || 'all';
+      const storyMap = new Map();
+
+      // Seed with user stories
+      (state.userStories || []).forEach(s => {
+        storyMap.set(s.id, {
+          id: s.id,
+          title: s.title || s.id,
+          role: s.role || 'general',
+          count: 0
+        });
+      });
+
+      // Aggregate test case counts
+      (state.testCases || []).forEach(tc => {
+        const sId = tc.userStoryId || 'Uncategorized';
+        if (!storyMap.has(sId)) {
+          storyMap.set(sId, {
+            id: sId,
+            title: tc.userStoryTitle || sId,
+            role: tc.role || 'general',
+            count: 0
+          });
+        }
+        storyMap.get(sId).count++;
+      });
+
+      // Sort naturally by Story ID (e.g. US-1, US-2, US-10)
+      const sortedStories = Array.from(storyMap.values()).sort((a, b) =>
+        a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' })
+      );
+
+      let optionsHtml = `<option value="all">All User Stories (${(state.testCases || []).length} cases)</option>`;
+      sortedStories.forEach(s => {
+        optionsHtml += `<option value="${s.id}">[${s.id}] ${s.title} (${s.count} cases)</option>`;
+      });
+
+      select.innerHTML = optionsHtml;
+
+      if (Array.from(select.options).some(o => o.value === currentVal)) {
+        select.value = currentVal;
+      } else {
+        select.value = 'all';
+      }
+    }
+
+    function toggleStoryGrouping() {
+      isReviewGroupedByStory = !isReviewGroupedByStory;
+      const label = document.getElementById('label-toggle-grouping');
+      const btn = document.getElementById('btn-toggle-grouping');
+      const btnAll = document.getElementById('btn-toggle-all-accordions');
+      if (label) {
+        label.innerText = isReviewGroupedByStory ? 'Categorized by Story' : 'Flat View';
+      }
+      if (btn) {
+        if (isReviewGroupedByStory) {
+          btn.className = "text-xs bg-teal-50 text-teal-800 font-medium px-3 py-2 rounded-lg border border-teal-300 transition flex items-center space-x-1.5 shadow-xs";
+        } else {
+          btn.className = "text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium px-3 py-2 rounded-lg border border-slate-200 transition flex items-center space-x-1.5";
+        }
+      }
+      if (btnAll) {
+        btnAll.style.display = isReviewGroupedByStory ? 'inline-flex' : 'none';
+      }
+      renderReviewBoard();
+    }
+
+    function toggleStoryAccordion(storyId) {
+      const body = document.getElementById(`story-body-${storyId}`);
+      const chevron = document.getElementById(`chevron-${storyId}`);
+      if (collapsedStoryGroups.has(storyId)) {
+        collapsedStoryGroups.delete(storyId);
+        if (body) body.classList.remove('hidden');
+        if (chevron) chevron.classList.remove('-rotate-90');
+      } else {
+        collapsedStoryGroups.add(storyId);
+        if (body) body.classList.add('hidden');
+        if (chevron) chevron.classList.add('-rotate-90');
+      }
+      updateExpandAllButtonLabel();
+    }
+
+    function toggleAllStorySections() {
+      const allStoryHeaders = document.querySelectorAll('[id^="story-group-"]');
+      const allStoryIds = Array.from(allStoryHeaders).map(el => el.id.replace('story-group-', ''));
+      if (collapsedStoryGroups.size > 0) {
+        collapsedStoryGroups.clear();
+      } else {
+        allStoryIds.forEach(id => collapsedStoryGroups.add(id));
+      }
+      updateExpandAllButtonLabel();
+      renderReviewBoard();
+    }
+
+    function updateExpandAllButtonLabel() {
+      const label = document.getElementById('label-toggle-all-accordions');
+      if (!label) return;
+      label.innerText = collapsedStoryGroups.size > 0 ? 'Expand All' : 'Collapse All';
+    }
+
+    async function approveStoryTestCases(storyId) {
+      const storyCases = (state.testCases || []).filter(tc => (tc.userStoryId || 'Uncategorized') === storyId);
+      const eligibleCases = storyCases.filter(tc => tc.status !== 'approved' && tc.status !== 'rejected');
+      if (eligibleCases.length === 0) {
+        alert(`All valid test cases for story ${storyId} are already approved.`);
         return;
       }
 
-      container.innerHTML = list.map(tc => `
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+      const idsToApprove = eligibleCases.map(tc => tc.id);
+      try {
+        const res = await fetch('/api/test-cases/batch-approve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: idsToApprove })
+        });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `HTTP ${res.status}`);
+        }
+        state.testCases = await fetch('/api/test-cases').then(r => r.json());
+        populateReviewStoryDropdown();
+        renderReviewBoard();
+        updateHeaderBadges();
+      } catch (err) {
+        alert("Story batch approval failed: " + err.message);
+      }
+    }
+
+    function resetReviewFilters() {
+      const storySel = document.getElementById('filter-review-story');
+      const statusSel = document.getElementById('filter-review-status');
+      const typeSel = document.getElementById('filter-review-type');
+      if (storySel) storySel.value = 'all';
+      if (statusSel) statusSel.value = 'all';
+      if (typeSel) typeSel.value = 'all';
+      renderReviewBoard();
+    }
+
+    function renderTestCaseCard(tc) {
+      return `
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4 hover:border-slate-300 transition">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-3">
-            <div class="flex items-center space-x-2">
+            <div class="flex flex-wrap items-center gap-2">
               <span class="font-mono font-bold text-slate-900">${tc.id}</span>
+              <span class="font-mono text-xs text-teal-700 bg-teal-50 px-2 py-0.5 rounded border border-teal-200" title="User Story ID">${tc.userStoryId || 'US'}</span>
               <span class="text-xs px-2.5 py-0.5 rounded-full font-semibold uppercase ${tc.scenarioType === 'positive' ? 'badge-positive' : tc.scenarioType === 'negative' ? 'badge-negative' : 'badge-edge'}">${tc.scenarioType}</span>
               <span class="text-xs text-slate-400">| Priority: <strong class="text-slate-700">${tc.priority}</strong></span>
               <span class="text-xs text-slate-400">| Role: <strong class="text-slate-700 uppercase">${tc.role}</strong></span>
@@ -1133,7 +1335,207 @@ ${strategy.userTemplate
             </div>
           </div>
         </div>
-      `).join('');
+      `;
+    }
+
+    // Review Board Renderer
+    function renderReviewBoard() {
+      const filterStory = document.getElementById('filter-review-story')?.value || 'all';
+      const filterStatus = document.getElementById('filter-review-status')?.value || 'all';
+      const filterType = document.getElementById('filter-review-type')?.value || 'all';
+      const sortOrder = document.getElementById('sort-review-order')?.value || 'story-asc';
+      const container = document.getElementById('review-cards-list');
+      const summaryEl = document.getElementById('review-filter-summary');
+      const metricsBadge = document.getElementById('review-metrics-badge');
+      if (!container) return;
+
+      let list = [...(state.testCases || [])];
+
+      // Filter by User Story
+      if (filterStory !== 'all') {
+        list = list.filter(tc => (tc.userStoryId || 'Uncategorized') === filterStory);
+      }
+      // Filter by Status
+      if (filterStatus !== 'all') {
+        list = list.filter(tc => tc.status === filterStatus);
+      }
+      // Filter by Scenario Type
+      if (filterType !== 'all') {
+        list = list.filter(tc => tc.scenarioType === filterType);
+      }
+
+      // Update metrics & count summary
+      const totalCases = (state.testCases || []).length;
+      const uniqueStoryIds = new Set((state.testCases || []).map(tc => tc.userStoryId || 'Uncategorized'));
+      if (metricsBadge) {
+        metricsBadge.innerText = `${totalCases} Cases across ${uniqueStoryIds.size} Stories`;
+      }
+      if (summaryEl) {
+        summaryEl.innerText = `Showing ${list.length} of ${totalCases} test cases`;
+      }
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white p-12 rounded-2xl text-center space-y-3 border border-slate-200 shadow-sm">
+            <div class="w-12 h-12 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+              <i data-lucide="filter-x" class="w-6 h-6"></i>
+            </div>
+            <h4 class="font-bold text-slate-800 text-base">No matching test cases</h4>
+            <p class="text-xs text-slate-500 max-w-md mx-auto">No test cases match the currently applied story, status, or scenario filters.</p>
+            <button onclick="resetReviewFilters()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition inline-flex items-center space-x-1">
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span>Reset Filters</span>
+            </button>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      const priorityWeight = p => ({ 'critical': 4, 'high': 3, 'medium': 2, 'low': 1 })[(p || '').toLowerCase()] || 0;
+      const statusWeight = s => ({ 'pending_review': 4, 'edited': 3, 'approved': 2, 'rejected': 1 })[(s || '').toLowerCase()] || 0;
+
+      const caseComparator = (a, b) => {
+        if (sortOrder === 'priority') {
+          const diff = priorityWeight(b.priority) - priorityWeight(a.priority);
+          if (diff !== 0) return diff;
+        } else if (sortOrder === 'status') {
+          const diff = statusWeight(b.status) - statusWeight(a.status);
+          if (diff !== 0) return diff;
+        } else if (sortOrder === 'tc-desc') {
+          return b.id.localeCompare(a.id, undefined, { numeric: true, sensitivity: 'base' });
+        }
+        return a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' });
+      };
+
+      if (isReviewGroupedByStory) {
+        // Group test cases by User Story ID
+        const groupsMap = new Map();
+        list.forEach(tc => {
+          const sId = tc.userStoryId || 'Uncategorized';
+          if (!groupsMap.has(sId)) {
+            const storyObj = (state.userStories || []).find(s => s.id === sId);
+            groupsMap.set(sId, {
+              storyId: sId,
+              storyTitle: (storyObj && storyObj.title) || tc.userStoryTitle || sId,
+              storyRole: (storyObj && storyObj.role) || tc.role || 'general',
+              storyModule: (storyObj && storyObj.module) || '',
+              storyDescription: (storyObj && (storyObj.story || storyObj.description)) || '',
+              cases: []
+            });
+          }
+          groupsMap.get(sId).cases.push(tc);
+        });
+
+        const groupsArray = Array.from(groupsMap.values());
+
+        // Sort story categories based on selected sort order
+        groupsArray.sort((gA, gB) => {
+          if (sortOrder === 'story-desc') {
+            return gB.storyId.localeCompare(gA.storyId, undefined, { numeric: true, sensitivity: 'base' });
+          } else if (sortOrder === 'story-asc') {
+            return gA.storyId.localeCompare(gB.storyId, undefined, { numeric: true, sensitivity: 'base' });
+          } else if (sortOrder === 'priority') {
+            const maxA = Math.max(...gA.cases.map(c => priorityWeight(c.priority)));
+            const maxB = Math.max(...gB.cases.map(c => priorityWeight(c.priority)));
+            if (maxB !== maxA) return maxB - maxA;
+          } else if (sortOrder === 'status') {
+            const pendingA = gA.cases.filter(c => c.status === 'pending_review').length;
+            const pendingB = gB.cases.filter(c => c.status === 'pending_review').length;
+            if (pendingB !== pendingA) return pendingB - pendingA;
+          } else if (sortOrder === 'tc-desc') {
+            const maxIdA = gA.cases.map(c => c.id).sort().reverse()[0] || '';
+            const maxIdB = gB.cases.map(c => c.id).sort().reverse()[0] || '';
+            return maxIdB.localeCompare(maxIdA, undefined, { numeric: true });
+          } else if (sortOrder === 'tc-asc') {
+            const minIdA = gA.cases.map(c => c.id).sort()[0] || '';
+            const minIdB = gB.cases.map(c => c.id).sort()[0] || '';
+            return minIdA.localeCompare(minIdB, undefined, { numeric: true });
+          }
+          return gA.storyId.localeCompare(gB.storyId, undefined, { numeric: true, sensitivity: 'base' });
+        });
+
+        // Render each story category section
+        container.innerHTML = groupsArray.map(group => {
+          group.cases.sort(caseComparator);
+          const isCollapsed = collapsedStoryGroups.has(group.storyId);
+          const approvedCount = group.cases.filter(c => c.status === 'approved').length;
+          const pendingCount = group.cases.filter(c => c.status === 'pending_review').length;
+          const posCount = group.cases.filter(c => c.scenarioType === 'positive').length;
+          const negCount = group.cases.filter(c => c.scenarioType === 'negative').length;
+          const edgeCount = group.cases.filter(c => c.scenarioType === 'edge_case').length;
+
+          const roleBadgeClass = group.storyRole === 'patient'
+            ? 'bg-sky-50 text-sky-700 border border-sky-200'
+            : group.storyRole === 'doctor'
+            ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+            : group.storyRole === 'admin'
+            ? 'bg-purple-50 text-purple-700 border border-purple-200'
+            : 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+
+          return `
+            <div class="user-story-group bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden transition-all" id="story-group-${group.storyId}">
+              <!-- Story Header Banner -->
+              <div class="p-4 bg-gradient-to-r from-slate-50 via-teal-50/20 to-white border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3 cursor-pointer select-none hover:bg-slate-50/80 transition" onclick="toggleStoryAccordion('${group.storyId}')">
+                <div class="flex items-start md:items-center space-x-3">
+                  <button type="button" class="mt-0.5 md:mt-0 p-1 text-slate-400 hover:text-slate-700 transition" aria-label="Toggle story section">
+                    <i data-lucide="chevron-down" id="chevron-${group.storyId}" class="w-5 h-5 transform transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}"></i>
+                  </button>
+                  <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                      <span class="font-mono font-bold text-xs text-teal-800 bg-teal-100/90 px-2.5 py-0.5 rounded border border-teal-300 shadow-xs">${group.storyId}</span>
+                      <span class="text-xs font-semibold px-2 py-0.5 rounded-full uppercase ${roleBadgeClass}">${group.storyRole}</span>
+                      ${group.storyModule ? `<span class="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded">${group.storyModule}</span>` : ''}
+                      <span class="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-full border border-slate-200">
+                        ${group.cases.length} Test Case${group.cases.length === 1 ? '' : 's'}
+                      </span>
+                    </div>
+                    <h3 class="text-sm font-bold text-slate-900">${group.storyTitle}</h3>
+                    ${group.storyDescription ? `<p class="text-xs text-slate-500 mt-0.5 italic line-clamp-1">"${group.storyDescription}"</p>` : ''}
+                  </div>
+                </div>
+
+                <div class="flex items-center space-x-2 pl-9 md:pl-0" onclick="event.stopPropagation()">
+                  <div class="hidden sm:flex items-center space-x-1.5 text-[11px]">
+                    <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium">${approvedCount} Approved</span>
+                    <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-medium">${pendingCount} Pending</span>
+                    <span class="px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 font-medium">${posCount} Pos</span>
+                    <span class="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 font-medium">${negCount} Neg</span>
+                    <span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200 font-medium">${edgeCount} Edge</span>
+                  </div>
+                  <button onclick="approveStoryTestCases('${group.storyId}')" class="text-xs bg-teal-600 hover:bg-teal-700 text-white px-3 py-1.5 rounded-lg font-medium shadow-sm transition flex items-center space-x-1" title="Approve all pending cases in ${group.storyId}">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                    <span>Approve Story Cases</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Nested Test Cases in Story -->
+              <div id="story-body-${group.storyId}" class="p-4 space-y-4 bg-slate-50/40 ${isCollapsed ? 'hidden' : ''}">
+                ${group.cases.map(tc => renderTestCaseCard(tc)).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } else {
+        // Flat List Mode: Sort test cases directly
+        list.sort((a, b) => {
+          if (sortOrder === 'story-asc') {
+            const sDiff = (a.userStoryId || '').localeCompare(b.userStoryId || '', undefined, { numeric: true, sensitivity: 'base' });
+            if (sDiff !== 0) return sDiff;
+            return a.id.localeCompare(b.id, undefined, { numeric: true });
+          } else if (sortOrder === 'story-desc') {
+            const sDiff = (b.userStoryId || '').localeCompare(a.userStoryId || '', undefined, { numeric: true, sensitivity: 'base' });
+            if (sDiff !== 0) return sDiff;
+            return a.id.localeCompare(b.id, undefined, { numeric: true });
+          } else {
+            return caseComparator(a, b);
+          }
+        });
+
+        container.innerHTML = list.map(tc => renderTestCaseCard(tc)).join('');
+      }
 
       lucide.createIcons();
     }
@@ -1151,6 +1553,7 @@ ${strategy.userTemplate
           body: JSON.stringify({ action, reviewNotes: notes })
         });
         state.testCases = await fetch('/api/test-cases').then(r => r.json());
+        populateReviewStoryDropdown();
         renderReviewBoard();
         updateHeaderBadges();
       } catch (err) {
@@ -1166,6 +1569,7 @@ ${strategy.userTemplate
           body: JSON.stringify({})
         });
         state.testCases = await fetch('/api/test-cases').then(r => r.json());
+        populateReviewStoryDropdown();
         renderReviewBoard();
         updateHeaderBadges();
       } catch (err) {
@@ -1217,7 +1621,9 @@ ${strategy.userTemplate
         });
         closeEditModal();
         state.testCases = await fetch('/api/test-cases').then(r => r.json());
+        populateReviewStoryDropdown();
         renderReviewBoard();
+        updateHeaderBadges();
       } catch (err) {
         alert(err.message);
       }
