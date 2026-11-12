@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const http = require('http');
 const db = require('./db');
 const { generateTestCases, PROMPT_STRATEGIES } = require('./llmEngine');
@@ -13,8 +14,39 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve screenshots and client static files
-app.use('/screenshots', express.static(path.join(__dirname, '..', 'screenshots')));
+// Serve screenshots with persistent database fallback (survives Render redeployments)
+const SCREENSHOTS_DIR = path.join(__dirname, '..', 'screenshots');
+app.get('/screenshots/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(SCREENSHOTS_DIR, filename);
+  if (fs.existsSync(filePath)) {
+    return res.sendFile(filePath);
+  }
+
+  // Fallback: search in persistent execution runs for matching screenshotData
+  try {
+    const runs = db.getExecutionRuns();
+    for (const run of runs) {
+      for (const r of (run.results || [])) {
+        if (r.screenshotUrl && r.screenshotUrl.includes(filename) && r.screenshotData) {
+          if (filename.endsWith('.svg') || r.screenshotData.startsWith('<svg')) {
+            res.setHeader('Content-Type', 'image/svg+xml');
+            return res.send(r.screenshotData);
+          } else if (r.screenshotData.startsWith('data:image/png;base64,')) {
+            const base64Data = r.screenshotData.replace(/^data:image\/png;base64,/, '');
+            const img = Buffer.from(base64Data, 'base64');
+            res.setHeader('Content-Type', 'image/png');
+            return res.send(img);
+          }
+        }
+      }
+    }
+  } catch (err) {}
+
+  res.status(404).send('Screenshot not found');
+});
+
+// Client static files
 app.use(express.static(path.join(__dirname, '..', 'client')));
 
 // Health check

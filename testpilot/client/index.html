@@ -2035,6 +2035,103 @@ ${strategy.userTemplate
       await fetchAllData();
       alert("Database reset to pristine seed state!");
     }
+
+    // Evidence & Screenshot Modal Logic
+    function openEvidenceModal(runId, testCaseId) {
+      const run = (state.executionRuns || []).find(r => r.id === runId);
+      const result = run ? (run.results || []).find(r => r.testCaseId === testCaseId) || run.results?.[0] : null;
+      const tc = (state.testCases || []).find(t => t.id === testCaseId);
+
+      const isPassed = result ? result.status === 'PASSED' : true;
+
+      // Status badge
+      const statusBadge = document.getElementById('evidence-status-badge');
+      if (statusBadge) {
+        statusBadge.innerText = isPassed ? 'PASSED' : 'FAILED';
+        statusBadge.className = `px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${isPassed ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-rose-100 text-rose-800 border border-rose-200'}`;
+      }
+
+      // Title & IDs
+      const tcIdEl = document.getElementById('evidence-tc-id');
+      if (tcIdEl) tcIdEl.innerText = testCaseId;
+
+      const titleEl = document.getElementById('evidence-title');
+      if (titleEl) titleEl.innerText = (result && result.title) || (tc && tc.title) || testCaseId;
+
+      const urlLink = document.getElementById('evidence-url-link');
+      if (urlLink) {
+        const url = (result && result.testedUrl) || 'http://localhost:3000';
+        urlLink.href = url;
+        urlLink.innerText = url;
+      }
+
+      const durEl = document.getElementById('evidence-duration');
+      if (durEl) durEl.innerText = `Duration: ${result ? result.durationMs : 0}ms`;
+
+      // Visual evidence
+      const imgEl = document.getElementById('evidence-image');
+      const iframeContainer = document.getElementById('evidence-iframe-container');
+      const iframeEl = document.getElementById('evidence-iframe');
+      const placeholder = document.getElementById('evidence-placeholder');
+      const rawBtn = document.getElementById('btn-open-raw-evidence');
+
+      const screenshotUrl = result?.screenshotUrl;
+      if (screenshotUrl) {
+        if (rawBtn) {
+          rawBtn.href = screenshotUrl;
+          rawBtn.classList.remove('hidden');
+        }
+
+        if (screenshotUrl.endsWith('.svg')) {
+          if (imgEl) imgEl.classList.add('hidden');
+          if (placeholder) placeholder.classList.add('hidden');
+          if (iframeContainer && iframeEl) {
+            iframeContainer.classList.remove('hidden');
+            iframeEl.src = screenshotUrl;
+          }
+        } else {
+          if (iframeContainer) iframeContainer.classList.add('hidden');
+          if (placeholder) placeholder.classList.add('hidden');
+          if (imgEl) {
+            imgEl.classList.remove('hidden');
+            imgEl.src = screenshotUrl;
+          }
+        }
+      } else {
+        if (imgEl) imgEl.classList.add('hidden');
+        if (iframeContainer) iframeContainer.classList.add('hidden');
+        if (placeholder) placeholder.classList.remove('hidden');
+        if (rawBtn) rawBtn.classList.add('hidden');
+      }
+
+      // Step validation checklist
+      const stepsContainer = document.getElementById('evidence-steps-list');
+      if (stepsContainer) {
+        const steps = (tc && tc.steps) || [];
+        if (steps.length > 0) {
+          stepsContainer.innerHTML = steps.map((s, idx) => `
+            <div class="flex items-start space-x-2 py-1 border-b border-slate-100 last:border-b-0">
+              <span class="text-emerald-600 font-bold shrink-0">✓ Step ${s.stepNumber || idx + 1}:</span>
+              <span class="text-slate-800 flex-1">${escapeHtml(s.action)}</span>
+              <span class="text-slate-500 font-sans text-[11px]">${escapeHtml(s.expectedResult)}</span>
+            </div>
+          `).join('');
+        } else {
+          stepsContainer.innerHTML = `<div class="text-slate-500 italic">No detailed steps recorded.</div>`;
+        }
+      }
+
+      const modal = document.getElementById('modal-evidence');
+      if (modal) modal.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeEvidenceModal() {
+      const modal = document.getElementById('modal-evidence');
+      if (modal) modal.classList.add('hidden');
+      const iframeEl = document.getElementById('evidence-iframe');
+      if (iframeEl) iframeEl.src = '';
+    }
   </script>
 
   <!-- Test Execution Evidence & Screenshot Modal -->

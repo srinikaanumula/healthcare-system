@@ -171,6 +171,7 @@ async function executeSingleTestCase(testCase, options = {}) {
   let errorDetails = null;
   let failedStep = null;
   let screenshotName = null;
+  let screenshotData = null;
 
   logs.push(`[${new Date().toISOString()}] Initializing Playwright runner for: ${testCase.id} - "${testCase.title}"`);
   logs.push(`[Config] Role: ${testCase.role} | Scenario: ${testCase.scenarioType} | Target Base: ${targetBaseUrl}`);
@@ -234,6 +235,7 @@ async function executeSingleTestCase(testCase, options = {}) {
           const svgPath = path.join(SCREENSHOTS_DIR, screenshotName);
           const svgData = generateSyntheticScreenshotSvg(testCase, urlToVisit, testCase.steps, 'PASSED', Date.now() - startTime);
           fs.writeFileSync(svgPath, svgData, 'utf8');
+          screenshotData = svgData;
           logs.push(`[Screenshot] Visual outcome evidence saved: ${screenshotName}`);
         } catch (svgErr) {
           logs.push(`[Screenshot Note] Could not write SVG evidence: ${svgErr.message}`);
@@ -244,6 +246,7 @@ async function executeSingleTestCase(testCase, options = {}) {
           const svgPath = path.join(SCREENSHOTS_DIR, screenshotName);
           const svgData = generateSyntheticScreenshotSvg(testCase, urlToVisit, testCase.steps, 'FAILED', Date.now() - startTime);
           fs.writeFileSync(svgPath, svgData, 'utf8');
+          screenshotData = svgData;
         } catch (e) {}
         status = 'FAILED';
         failedStep = 1;
@@ -444,7 +447,10 @@ async function executeSingleTestCase(testCase, options = {}) {
     // Capture success screenshot
     screenshotName = `screenshot_${testCase.id}_${Date.now()}.png`;
     const screenshotPath = path.join(SCREENSHOTS_DIR, screenshotName);
-    await page.screenshot({ path: screenshotPath, fullPage: true });
+    const successBuf = await page.screenshot({ path: screenshotPath, fullPage: true });
+    if (successBuf) {
+      screenshotData = 'data:image/png;base64,' + successBuf.toString('base64');
+    }
     logs.push(`[Screenshot] Verification screenshot captured: ${screenshotName}`);
     }
 
@@ -461,7 +467,10 @@ async function executeSingleTestCase(testCase, options = {}) {
         const pages = browser.contexts()[0]?.pages();
         if (pages && pages[0]) {
           screenshotName = `failure_${testCase.id}_${Date.now()}.png`;
-          await pages[0].screenshot({ path: path.join(SCREENSHOTS_DIR, screenshotName) });
+          const failBuf = await pages[0].screenshot({ path: path.join(SCREENSHOTS_DIR, screenshotName) });
+          if (failBuf) {
+            screenshotData = 'data:image/png;base64,' + failBuf.toString('base64');
+          }
           logs.push(`[Screenshot] Captured failure screenshot: ${screenshotName}`);
         }
       }
@@ -486,6 +495,7 @@ async function executeSingleTestCase(testCase, options = {}) {
     durationMs: durationMs,
     logs: logs,
     screenshotUrl: screenshotName ? `/screenshots/${screenshotName}` : null,
+    screenshotData: screenshotData || null,
     errorDetails: errorDetails,
     failedStep: failedStep,
     testedUrl: (typeof urlToVisit !== "undefined" ? urlToVisit : targetBaseUrl),

@@ -17,6 +17,8 @@ services:
         value: SECRETKEY
       - key: ALGORITHM
         value: HS256
+      - key: ATLAS_URI
+        value: mongodb+srv://srinikaanumula_db_user:PDCnkyj8LQUMW8M3@cluster0.l0dygkc.mongodb.net/healthcare?retryWrites=true&w=majority
 
   # 2. Healthcare Frontend Web Portal
   - type: web
@@ -53,6 +55,8 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 20.18.0
+      - key: MONGODB_URI
+        value: mongodb+srv://srinikaanumula_db_user:PDCnkyj8LQUMW8M3@cluster0.l0dygkc.mongodb.net/healthcare?retryWrites=true&w=majority
       - key: AUT_FRONTEND_URL
         fromService:
           type: web
